@@ -1,0 +1,29 @@
+[project]
+name = "python-harness-example"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+dev = ["ruff>=0.12,<1", "pyright>=1.1.400,<2", "pytest>=8,<10", "pre-commit>=4,<5"]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pyright]
+include = ["src", "tools", "tests"]
+pythonVersion = "3.12"
+extraPaths = ["src", "tools"]
+typeCheckingMode = "standard"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "tools"]
+addopts = "--durations=15"

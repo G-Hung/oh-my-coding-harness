@@ -1,0 +1,10 @@
+# TODO: replace example roots with your existing project directories.
+# Paths are relative to this file; missing roots and symlink escapes are errors.
+roots = ["src", "tools", "tests"]
+# TODO: add generated/vendor directory names (matched at any depth).
+exclude = [".git", ".venv", "__pycache__", ".pytest_cache", ".ruff_cache", "node_modules", "dist"]
+# TODO: choose a useful review threshold; default is advisory, --strict blocks.
+max_lines = 400
+source_suffixes = [".py"]
+# README prompts also consider configuration changes.
+behavior_suffixes = [".py", ".toml", ".yaml", ".yml"]

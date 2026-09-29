@@ -1,0 +1,19 @@
+# Optional: merge with existing hooks rather than overwriting them.
+# Run uv sync first; hooks use installed dependencies without network access.
+repos:
+  - repo: local
+    hooks:
+      - id: python-static
+        name: Python static checks
+        entry: uv run --frozen --offline python tools/check.py --static-only
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]
+      - id: python-full
+        name: Python full checks
+        entry: uv run --frozen --offline python tools/check.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
