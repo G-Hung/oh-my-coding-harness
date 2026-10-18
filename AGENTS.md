@@ -39,6 +39,13 @@
   requirements for every maintenance task.
 - `docs/readme-standard.md`: README content and organization.
 - `docs/agent-guidelines/documentation.md`: the practical ASD-STE100 adaptation.
-- Run `python3 tools/check_library.py` for documentation changes. For script
-  changes, also run the affected kit's documented checks, including failure cases.
-  Do not run unrelated test matrices.
+- Before implementation, read `docs/maintenance.md`. This checkout uses tracked
+  hooks after explicit setup; do not assume cloning activated them.
+- Run `uv run --frozen --offline --no-sync python tools/check.py --static-only`
+  during iteration and the full command without `--static-only` before handoff.
+  Pre-commit checks staged content, commit-msg requires a Conventional Commit
+  prefix (optional scope), and pre-push checks proposed committed objects.
+- Fix reported failures and rerun the relevant command, then stage the fixes and
+  retry. Never bypass a hook, weaken a gate, or silently auto-stage repairs.
+- Use logical commits when authorized. Preserve other projects' hook managers and
+  AGENTS.md during adoption; this repo's active setup is not permission to change theirs.

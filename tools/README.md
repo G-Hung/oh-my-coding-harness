@@ -1,6 +1,15 @@
 # Library maintenance checks
 
-These small Python standard-library tools work with Python 3.9+ and Git. They
+The integrated [maintenance guide](../docs/maintenance.md) explains setup,
+pre-commit, commit-msg, pre-push, and the agent fix/retry loop.
+`check.py` runs static checks or the full gate; `git_gate.py` exports exact trees
+for `pre_commit.py` and `pre_push.py`. `install_hooks.py` enables the tracked
+hooks only on explicit request. `check_commit_message.py` checks the subject
+without constraining the body. Hook dispatch is tested in disposable Git repos.
+
+## Portable documentation helpers
+
+The three helpers below are Python standard-library tools work with Python 3.9+ and Git. They
 check tracked and untracked files while respecting Git ignore rules. They do
 not install anything, stage files, or contact external services.
 

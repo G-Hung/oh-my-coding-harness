@@ -75,6 +75,10 @@ There is no required test-suite taxonomy or universal coverage percentage.
 
 ## Pre-commit and pre-push
 
+For this library's own active integration, including commit-msg, see the
+[maintenance guide](maintenance.md). The kits below remain separately adopted
+examples; their existing hooks do not validate commit messages.
+
 Use hooks to catch failures before they enter a commit or leave your machine.
 Both kits include working examples. **Copying the files does not enable them.**
 

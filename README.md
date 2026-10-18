@@ -74,8 +74,19 @@ See [Codex adoption notes](adapters/codex/README.md) for layout and invocation.
 
 ## Maintain this library
 
-Run `python3 tools/check_library.py` for local documentation paths and portability.
-Run affected kit tests for script changes; see [maintenance checks](tools/README.md).
-Nothing here installs hooks or publishes automatically.
+This repo uses its own checks. After the explicit [local setup](docs/maintenance.md),
+tracked Git hooks run fast static checks on the staged snapshot, validate commit
+subjects such as `feat(hooks): add checks`, and run the full gate on proposed pushed
+commits. A failure returns the command and error to the agent: fix, rerun, stage,
+and retry. Hooks never fix or stage files on your behalf.
+
+Run `uv run --frozen --offline --no-sync python tools/check.py` for the full gate,
+or add `--static-only` for the pre-commit checks. See the
+[maintenance guide](docs/maintenance.md) for setup, check coverage, examples of
+rejected changes, and how the scripts fit together. Other projects should adopt
+only the checks and hook integration approved for their environment.
+
+Hooks are local and bypassable. Use the same commands in CI for shared enforcement.
+Cloning does not activate hooks, and installing them does not authorize a push.
 
 [MIT license](LICENSE).
