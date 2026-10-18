@@ -40,8 +40,8 @@ root; use them when present, along with the closest area instructions and README
 - `docs/agent-guidelines/formal-verification.md`: bounded models and implementation conformance, when adopted.
 - `docs/readme-standard.md`: what a useful subsystem README should contain.
 
-<!-- TODO: After copying, keep only pointers to adopted or existing files and
-adjust their paths. Add essential project context, ownership boundaries, actual
-check commands, and approval constraints; keep detailed procedures in focused
+<!-- TODO: Only after explicit approval to create or adapt AGENTS.md, keep
+pointers to adopted or existing files and adjust their paths. Add essential
+project context, ownership boundaries, actual check commands, and approval constraints; keep detailed procedures in focused
 guides. Preserve the project's existing safeguards rather than replacing them
 with this template's generic defaults. -->
