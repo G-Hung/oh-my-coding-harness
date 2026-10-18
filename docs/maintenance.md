@@ -54,7 +54,15 @@ A revision without the gate is blocked rather than treated as validated.
 Both runners reuse installed dependency environments, not their source files, from
 the originating checkout. Update those environments to match the relevant lockfiles
 before running checks. Dependencies and their caches are not isolated security
-sandboxes. Source snapshots are temporary; failure output remains in the terminal.
+sandboxes. Source snapshots are temporary. Each check prints one progress/result line with
+elapsed time. Warnings and file-size review prompts remain visible (up to three
+short messages per check); full output is retained in a separate temporary log
+directory whenever a check warns, fails, or cannot start. Missing top-level tools
+are reported directly before checks start. Failures
+show the rerun command and the last 60 lines, capped at 12,000 characters. Logs
+survive snapshot cleanup; remove them after investigation. Clean runs delete their
+logs. Negative-test error output stays in the log rather than looking like a
+failed gate. This changes presentation only, not check selection or exit status.
 No remote access is performed by the gate. Git itself still needs explicit user
 authorization for an actual push.
 
