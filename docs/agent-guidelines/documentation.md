@@ -15,6 +15,36 @@ and whether another maintained explanation preserves its meaning. When moving
 detail, keep a clear conditional pointer and verify the target is available to
 the reader. Independently copied material must retain its essential procedure.
 
+## Simplified Technical English
+
+Use an ASD-STE100-inspired style for maintained English documentation, comments,
+and docstrings. This is a software adaptation, not a claim of full compliance
+with the standard or its controlled dictionary. Use the
+[official ASD-STE100 overview](https://www.asd-ste100.org/about_STE.html) as the
+reference for the standard.
+
+- Give each sentence one main idea. Use short sentences when they preserve clarity;
+  do not omit conditions or necessary words to meet a length target.
+- Name the actor when ownership matters. Prefer active voice and direct verbs.
+- Put prerequisites and conditions before the action. Use numbered steps when
+  the reader must perform actions in order.
+- Use the same term for the same concept. Preserve distinctions such as missing
+  versus zero, failed versus blocked, and model checking versus implementation tests.
+- Preserve requirement strength. Do not interchange `must`, `may`, and `must not`.
+- State limits, exceptions, failure behavior, and recovery steps explicitly.
+  Explain the reason for a constraint when code alone does not make it clear.
+- Avoid idioms, filler, dense noun phrases, and ambiguous pronouns.
+
+For example, replace "If appropriate, leverage the gate" with "If a change affects
+a modeled contract, run its adopted formal check." Keep the exact condition that
+limits when the action is required.
+
+Preserve identifiers, commands, links, heading anchors, legal notices, and tool
+directives. Do not rewrite executable examples to satisfy a prose rule. A style
+pass does not authorize changes to runtime prompts, UI text, logs, error strings,
+fixtures, snapshots, generated content, or historical records. Check the code
+before rewriting a behavioral claim and report uncertainty where evidence is missing.
+
 ## Documentation checks
 
 Use the project's README change prompt, if available, to find potentially stale

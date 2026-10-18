@@ -29,22 +29,69 @@ uv run --frozen --offline python tools/check_max_lines.py
 uv run --frozen --offline python tools/check_max_lines.py --strict
 ```
 
-README prompts require this kit to be at the Git repository root; an invalid revision fails. Staged mode works before the first commit. Worktree mode compares a commit (default `HEAD`) against the index and working tree and includes visible untracked files; both sides of renames and deletions are considered. A changed nearby README suppresses a prompt but does not prove documentation accuracy. Inspect the behavior yourself.
+README prompts require this kit to be at the Git repository root; an invalid revision fails. Staged mode and worktree mode without `--base` work before the first commit. Worktree mode unions separate index, worktree, and visible untracked changes. With `--base`, it also includes branch commits since the merge base, retaining both sides of renames and deletions. A changed nearby README remains a prompt to verify accuracy; file co-change does not establish correctness.
 
-The link checker verifies local file targets in inline Markdown links, including images and URL-encoded paths. URL queries and fragments are ignored; encoded filename characters remain literal. Protocol-relative remote links are skipped. Root-relative targets are project-relative. It does not validate headings, network URLs, reference-style links, or full Markdown syntax; code examples containing inline link syntax are also checked. File discovery excludes configured directories and rejects links outside the project root. Keep examples self-contained. It requires at least one Markdown file.
+The link checker uses `markdown-it-py` in CommonMark mode to verify local inline and defined reference-style links, including images and URL-encoded paths. It skips fenced/indented code and inline code. Full, collapsed, and shortcut references use case-insensitive labels. Undefined references are plain text in Markdown, not file targets. URL queries and fragments are ignored; encoded filename characters remain literal. Protocol-relative remote links are skipped. Root-relative targets are project-relative. It does not validate headings, network URLs, raw HTML links, or Markdown extensions outside CommonMark. File discovery excludes configured directories and rejects links outside the project root. It requires at least one Markdown file.
 
 The max-lines check counts physical source lines, including comments and blanks. Its default is a review prompt, not a mandate to split a cohesive module. Use `--strict` only after choosing an appropriate threshold. Missing source roots or an empty source inventory are errors. Slow-test output identifies investigation candidates; there is no universal time or coverage quota.
 
 ## Adapt and verify
 
-Edit the commented `harness.toml` roots, suffixes, exclusions, and line threshold. Ruff, Pyright, and pytest retain their native settings in `pyproject.toml`; update their scope when adapting the project. Inspect the command list in `tools/check.py` and add only relevant offline checks. Keep `tools/harness.py` with the dependent helpers. After adoption, introduce a temporary broken link, type error, and failing assertion in a disposable checkout to verify failures reach the shell, then remove them.
+Edit the commented `harness.toml` roots, suffixes, exclusions, and line threshold. Ruff, Pyright, and pytest retain their native settings in `pyproject.toml`; update their scope when adapting the project. Inspect the command list in `tools/check.py` and add only relevant offline checks. Keep `tools/harness.py` with the dependent helpers. If adopting the link checker alone, also add `markdown-it-py` to the target environment and lockfile; copying the script does not install its parser. After adoption, introduce a temporary broken link, type error, and failing assertion in a disposable checkout to verify failures reach the shell, then remove them.
 
-## Optional hooks
+## Pre-commit and pre-push
 
-Merge `.pre-commit-config.yaml` with existing hooks, then explicitly install:
+Copy [.pre-commit-config.yaml](.pre-commit-config.yaml), together with the check
+runner, helpers, and project configuration. Activation is opt-in. Run these commands
+from the target project's Git root.
 
-```sh
-uv run pre-commit install --hook-type pre-commit --hook-type pre-push
-```
+1. Inspect existing hooks before installation:
 
-Pre-commit runs static checks; pre-push runs the complete gate. Neither modifies files or checks commit messages. Hooks require the already-synced environment and do not replace final review. Remove or narrow a hook if its latency makes local iteration impractical; preserve the equivalent final check.
+   ```sh
+   git config --show-origin --get core.hooksPath
+   git rev-parse --git-path hooks
+   ```
+
+   No configured `core.hooksPath` is normal. Inspect the effective directory and
+   any existing `.pre-commit-config.yaml`. Merge entries rather than overwrite
+   them. If another manager owns the hooks, integrate the check commands there.
+   `pre-commit install` refuses a configured `core.hooksPath`; do not unset it just
+   to force installation. With existing unmanaged hooks, inspect the migration
+   behavior and preserve their checks; do not use `--overwrite` blindly.
+
+2. Sync dependencies and test both stages before activation:
+
+   ```sh
+   uv sync --locked
+   uv run --frozen --offline pre-commit validate-config
+   uv run --frozen --offline pre-commit run python-static --hook-stage pre-commit --all-files
+   uv run --frozen --offline pre-commit run python-full --hook-stage pre-push --all-files
+   ```
+
+   These commands run the checks without committing or pushing. In a disposable
+   checkout, introduce a lint or type error and confirm `python-static` fails.
+   Restore it, introduce a failing test, and confirm `python-full` fails. Restore
+   the fixture and rerun both stages successfully.
+
+3. With no conflicting hook manager or hooks path, install both hook types:
+
+   ```sh
+   uv run --frozen --offline pre-commit install --hook-type pre-commit --hook-type pre-push
+   git rev-parse --git-path hooks/pre-commit
+   git rev-parse --git-path hooks/pre-push
+   ```
+
+   Inspect both returned files: each must be executable and contain the generated
+   `pre-commit` launcher. Keep the synced environment available and repeat this
+   verification in each checkout. Reinstall after moving or recreating an
+   environment if a launcher points to an obsolete interpreter.
+
+Pre-commit runs static checks; pre-push adds tests. A required command failure
+blocks the operation. The default file-size check remains advisory. Neither stage
+modifies files or checks commit messages. The configured commands run offline
+after dependency setup and inspect the current worktree, not an isolated index
+snapshot or every pushed ref. Formal verification is not enabled by these hooks.
+
+Hooks do not replace final review and can be bypassed. Mirror required checks in
+CI for shared enforcement. If you narrow a hook to reduce latency, retain the
+equivalent required check in the final gate.

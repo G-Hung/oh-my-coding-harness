@@ -1,38 +1,11 @@
----
-name: ship-cycle
-description: Execute approved changes with adaptive workers, one Astra Medium review loop, and verified local handoff.
----
-
-# Ship Cycle
+# Ship cycle procedure
 
 Complete the authorized scope through implementation, integration, meaningful
 checks, independent review, and final validation. An implementation request
 authorizes its stated scope; resolve routine choices without another approval
-pause. Planning and findings-only audits do not authorize edits. This skill is
-self-contained: copy it, then add your project's context and real check commands.
-
-## Execution Models
-
-Keep the main agent on the human-selected model and reasoning settings. Default
-execution helpers to Terra Medium. Choose directly using ambiguity, coupling,
-consequences of mistakes, available verification, and coordination/repair cost;
-this is not a mandatory escalation ladder.
-
-| Task | Model | Reasoning |
-| --- | --- | --- |
-| Repetitive, well-specified work; narrow searches or established edits | `gpt-5.6-luna` | `medium` |
-| Bounded implementation, tests, documentation, ordinary debugging | `gpt-5.6-terra` | `medium` |
-| Ambiguous debugging, coupled changes, substantial cross-module reasoning | `gpt-5.6-sol` | `medium` |
-| Hard architecture, consequential uncertainty, difficult unresolved failures | `gpt-6-astra` | Start at `low`; raise to `medium` or `high` when justified |
-
-Apply the execution policy to nested helpers too. Upgrade or downgrade an
-assignment when justified, transferring ownership first. If an execution model
-is unavailable, choose another suitable supported model or work directly; report
-material substitutions. Execution choices never change the reviewer settings.
-
-If the user selects Luna-only execution, every execution helper, including nested
-helpers and repair workers, uses Luna Medium. Difficult work returns to the main
-agent. The human-selected main model and mandatory reviewer retain separate roles.
+pause. Planning and findings-only audits do not authorize edits. Use the adopted project context and real check commands. Read the
+[model-selection rules](model-selection.md) and
+[model policy](../../.agents/model-policy.toml) before assigning work.
 
 ## Preparation And Ownership
 
@@ -51,8 +24,9 @@ the entire tree. Do not fill slots or create an extra management layer by defaul
 
 The main agent owns scope, write ownership, shared contracts, integration, complete
 checks, Git staging/commits, and handoff. It may implement retained work while
-workers run. Use `agent_type: "worker"`, explicit model and reasoning settings,
-and `fork_turns: "none"`. Give concise, self-contained assignments: repository,
+workers run. Pass the selected role's model, reasoning settings, and policy context setting
+through the available delegation API. Use only arguments that it supports; do not
+assume it accepts `agent_type` or `service_tier`. Give concise assignments: repository,
 diff base, deliverable, interfaces, relevant guidance, exclusive writable paths,
 and focused checks. Tell workers they are not alone and must preserve concurrent
 work. Workers may inspect broadly but must report out-of-scope edit needs before
@@ -84,12 +58,18 @@ blocked, but do not proceed to acceptance review, commits, or completion until
 required checks pass or the user explicitly overrides the requirement. Never
 weaken a gate, use live credentials, or repair shared data to obtain a pass.
 
-After integration and required checks pass, start one fresh independent reviewer:
-`agent_type: "default"`, `model: "gpt-6-astra"`,
-`reasoning_effort: "medium"`, `fork_turns: "none"`. Do not use the differently
-configured `code_review` role. This gate applies even with no execution helpers.
-An unavailable Astra Medium reviewer blocks acceptance; do not silently substitute
-another model. A user-requested review-policy change must be explicit.
+If the project has adopted models for affected state transitions, inspect their
+mapping to implementation code. Run the required bounded models and conformance
+tests. Require completed baseline exploration and exact expected counterexamples
+for controls and witnesses; reject skipped or incomplete checks. Report the bounds,
+assumptions, and excluded behavior. A passing model does not prove that application
+code conforms to it. Do not introduce a new mandatory formal gate for unrelated work.
+
+After integration and required checks pass, start one fresh independent reviewer
+using the adopted policy's `reviewer` settings. Do not use a generic review role
+whose settings differ from that policy. This gate applies even with no execution
+helpers. If the configured reviewer is unavailable, acceptance is blocked until
+the user explicitly approves a policy change. Do not silently substitute a model.
 
 Supply the repository path, diff base, complete latest scope/plan, full integrated
 change including new files, and validation evidence. Ask for all actionable

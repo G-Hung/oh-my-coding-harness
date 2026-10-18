@@ -71,6 +71,20 @@ class LibraryChecks(unittest.TestCase):
             finally:
                 portability.REPO_ROOT = old_root
 
+    def test_formal_sources_receive_the_same_portability_checks(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary).resolve()
+            old_root = portability.REPO_ROOT
+            try:
+                portability.REPO_ROOT = root
+                for suffix in ('.tla', '.cfg'):
+                    source = root / ('Model' + suffix)
+                    source.write_text('/' + 'Users/example/private-model\n')
+                    self.assertTrue(portability.should_check(source))
+                    self.assertEqual(len(portability.find_violations(source)), 1)
+            finally:
+                portability.REPO_ROOT = old_root
+
     def test_portability_rejects_ancestor_symlink_before_reading(self):
         with tempfile.TemporaryDirectory() as temporary:
             parent = Path(temporary).resolve()

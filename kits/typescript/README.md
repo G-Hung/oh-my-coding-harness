@@ -33,10 +33,64 @@ Link checking parses ordinary Markdown and reference links, ignores fenced examp
 
 Set `JEST_SLOW_TOP=10 JEST_SLOW_MIN_MS=100 npm run test:slow` to narrow the diagnostic. It reports input modification time and recorded test success. Always create a fresh profile first; timing depends on the machine and run mode, and parallel suite time cannot be summed into elapsed time. A slow test is not automatically redundant. Optimize expensive setup or scope only after preserving its behavior coverage. No complexity-dependent suite registry or coverage threshold is imposed.
 
-## Optional Git hooks
+## Pre-commit and pre-push
 
-Copy [pre-commit](hooks/pre-commit) and [pre-push](hooks/pre-push), inspect existing hooks and `git config --get core.hooksPath`, and merge rather than overwrite existing logic. For a new project with no hook setup, explicitly run `chmod +x hooks/pre-commit hooks/pre-push` and `git config core.hooksPath hooks`. Hooks are POSIX shell examples; Windows requires a compatible Git shell. There is no commit-message hook, attribution rule, automatic staging or formatting.
+Copy [pre-commit](hooks/pre-commit) and [pre-push](hooks/pre-push), together with
+their package commands, configuration, scripts, and helpers. Activation is opt-in.
+Run these commands from the target project's Git root.
 
-Pre-commit runs lint, types and staged README prompts; these checks inspect the current worktree, not an isolated index snapshot. Pre-push runs the full gate against the current worktree, not each pushed ref. Before a reviewed handoff, validate the exact state being handed off. Hooks can be bypassed, so mirror the chosen gate in CI if enforcement matters.
+1. Inspect existing configuration and the effective hook directory:
+
+   ```sh
+   git config --show-origin --get core.hooksPath
+   git rev-parse --git-path hooks
+   ```
+
+   No configured `core.hooksPath` is normal. Inspect the directory returned by the
+   second command for existing hooks. If the project uses a hook manager, merge
+   these commands into it. Do not replace its hooks or change its path blindly.
+
+2. Install dependencies and test both stages before activation:
+
+   ```sh
+   npm ci
+   sh hooks/pre-commit
+   sh hooks/pre-push
+   ```
+
+   These commands run the checks without committing or pushing. In a disposable
+   checkout, introduce a type error and confirm pre-commit fails. Restore it,
+   introduce a failing test, and confirm pre-push fails. Restore the fixture and
+   rerun both stages successfully.
+
+3. For a project with no existing hook setup, enable these files locally:
+
+   ```sh
+   chmod +x hooks/pre-commit hooks/pre-push
+   git config --local core.hooksPath hooks
+   git rev-parse --git-path hooks
+   test -x hooks/pre-commit && test -x hooks/pre-push
+   ```
+
+   The effective directory must resolve to the copied `hooks/` directory, and both
+   executable checks must pass. `npm run doctor` reports the configured path; it
+   does not establish that either hook is installed or executable. Activation is
+   local to this repository; verify each checkout before relying on it.
+
+Pre-commit runs lint, types, and staged README prompts. Pre-push runs `npm run
+check`, including tests. A required command failure blocks the operation; README
+and default file-size prompts remain advisory. Neither hook formats files, stages
+changes, or checks commit messages. POSIX shell is required; Windows needs a
+compatible Git shell.
+
+The checks inspect the current worktree, not an isolated index snapshot or each
+pushed ref. Before a reviewed handoff, validate the exact state being handed off.
+Hooks can be bypassed, so mirror the chosen gate in CI if enforcement matters.
+Formal verification is not enabled by these hooks.
 
 The default gate does not perform security, network, integration or dependency-upgrade checks. Select and configure those for the actual project; an unavailable required check is blocked, never passed.
+
+README change selection unions branch changes since the merge base, index changes,
+worktree changes, and visible untracked paths. A staged change is still reported
+if the worktree cancels it. Both rename paths count. A changed README remains a
+prompt to verify accuracy, not evidence that its content is current.

@@ -15,7 +15,8 @@ python3 -m unittest discover -s tools/tests -v
   code blocks and inline code. It rejects missing or outside-repository targets.
   It does not check anchors, reference-style links, or remote availability.
 - `check_portability.py` spots machine-specific home-directory paths and file
-  URLs in text. Diagnostics report locations without repeating matched values.
+  URLs in text, including TLA+ modules and configurations. Diagnostics report
+  locations without repeating matched values.
   Use `portability-check: ignore` on a deliberate example only. This is a
   portability check, not a credential scanner or comprehensive privacy audit.
 

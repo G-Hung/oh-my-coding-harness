@@ -11,17 +11,15 @@ function readGitChangedPaths({ staged = false, base } = {}) {
     const commit = git(['rev-parse', '--verify', '--end-of-options', `${base}^{commit}`]).trim();
     ref = git(['merge-base', 'HEAD', commit]).trim();
   }
-  const args = ['diff', '--name-status', '-z', '--diff-filter=ACMRDT'];
-  if (staged) args.push('--cached');
-  else if (ref) args.push(ref);
-  else {
-    // Diff tracked files even before the first commit; the index and worktree are separate.
-    const stagedOutput = git([...args, '--cached', '--']);
-    return [...new Set([...parseNames(stagedOutput), ...parseNames(git([...args, '--'])), ...git(['ls-files', '--others', '--exclude-standard', '-z']).split('\0').filter(Boolean)])];
-  }
-  args.push('--');
-  const paths = parseNames(git(args));
-  if (!staged) paths.push(...git(['ls-files', '--others', '--exclude-standard', '-z']).split('\0').filter(Boolean));
+  const args = ['diff', '--name-status', '-z', '-M', '--diff-filter=ACMRDT'];
+  if (staged) return [...new Set(parseNames(git([...args, '--cached', '--'])))];
+  // Keep branch, index, and worktree changes separate, even when they cancel.
+  const paths = [
+    ...parseNames(git([...args, '--cached', '--'])),
+    ...parseNames(git([...args, '--'])),
+    ...git(['ls-files', '--others', '--exclude-standard', '-z']).split('\0').filter(Boolean),
+  ];
+  if (ref) paths.push(...parseNames(git([...args, `${ref}..HEAD`, '--'])));
   return [...new Set(paths)];
 }
 function parseNames(output) {

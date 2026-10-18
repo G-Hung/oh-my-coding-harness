@@ -22,6 +22,8 @@ TEXT_FILE_SUFFIXES = {
     ".mjs",
     ".ts",
     ".tsx",
+    ".tla",
+    ".cfg",
 }
 
 EXCLUDED_DIR_NAMES = {

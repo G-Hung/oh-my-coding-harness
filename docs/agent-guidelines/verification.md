@@ -91,6 +91,19 @@ preview was requested. Use the retained session or verified process handle, wait
 for exit, and check the listener is gone. Report remaining owned resources and
 stop instructions. After interruption, reconcile ownership before launching more.
 
+## Adopted formal checks
+
+When a change affects a modeled contract, inspect its transition-to-code mapping
+and run the formal checks required by the project's policy. Check both the model
+and the linked implementation tests. Treat negative controls and reachability
+witnesses as distinct expected counterexamples; verify the exact invariant and
+checker outcome. Do not count a timeout, skipped suite, or incomplete exploration
+as evidence. Record bounds, assumptions, input identities, and coverage limits.
+
+Formal verification is optional until adopted. Keep it separate from ordinary
+kit checks and do not create automatic hooks or require a new runtime for unrelated
+work. A passing model cannot replace implementation tests or the final ship gate.
+
 ## Evidence and failures
 
 Record the command, checkout, exit outcome, and relevant report or failure excerpt.

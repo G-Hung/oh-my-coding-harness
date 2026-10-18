@@ -8,8 +8,8 @@ from urllib.parse import unquote, urlsplit
 
 from harness import ROOT as REPO_ROOT
 from harness import contained, files
+from markdown_it import MarkdownIt
 
-LINK_PATTERN = re.compile(r"!?\[[^\]]*]\(([^)\n]+)\)")
 LOCATION_SUFFIX = re.compile(r":\d+(?::\d+)?$")
 
 
@@ -22,20 +22,24 @@ def markdown_paths() -> list[str]:
 
 
 def local_targets(markdown: str) -> list[str]:
-    """Extract local path targets while excluding anchors and external schemes."""
+    """Extract rendered Markdown links and images, excluding code and remote URLs."""
     targets: list[str] = []
-    for raw in LINK_PATTERN.findall(markdown):
-        without_title = re.sub(r"""\s+["'][^"']*["']$""", "", raw.strip())
-        target = (
-            without_title[1:-1]
-            if without_title.startswith("<") and without_title.endswith(">")
-            else without_title
-        )
-        parsed = urlsplit(target)
-        if parsed.scheme or parsed.netloc or not parsed.path:
-            continue
-        # Parse before decoding so encoded question/hash characters stay in filenames.
-        targets.append(LOCATION_SUFFIX.sub("", unquote(parsed.path)))
+    for block in MarkdownIt("commonmark").parse(markdown):
+        for token in block.children or []:
+            if token.type == "link_open":
+                target = token.attrGet("href")
+            elif token.type == "image":
+                target = token.attrGet("src")
+            else:
+                continue
+            if target is None:
+                continue
+            if not isinstance(target, str):
+                raise ValueError("Markdown link destination must be text")
+            parsed = urlsplit(target)
+            if parsed.scheme or parsed.netloc or not parsed.path:
+                continue
+            targets.append(LOCATION_SUFFIX.sub("", unquote(parsed.path)))
     return targets
 
 

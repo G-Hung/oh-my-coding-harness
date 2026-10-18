@@ -1,22 +1,20 @@
-# Copyable skills
+# Codex adoption notes
 
-- [Ship cycle](.agents/skills/ship-cycle/SKILL.md): the complete implementation,
-  adaptive execution and nested ownership, main-agent integration, Astra Medium
-  review/fix loop, validation, and handoff procedure. Terra Medium is the execution
-  default; the optional Luna-only policy applies to every execution descendant.
-- [Weekly sweep](.agents/skills/weekly-sweep/SKILL.md): a broad active-area scan with
-  deeper investigation of the last two weeks, affected contracts, and concrete risks;
-  dependency, integration-test, slow-test, and README results remain explicit.
+Both entrypoints live at the repository root:
+[ship-cycle](../../.agents/skills/ship-cycle/SKILL.md) and
+[code-sweep](../../.agents/skills/code-sweep/SKILL.md).
+Copy the full [dependency bundles](../../docs/adoption.md#skill-bundles-to-copy),
+not just the skill folders. They share the model policy and model-selection guide.
 
-After approving adoption, copy either skill folder into the target project's
-`.agents/skills/`. Each `SKILL.md` contains its whole procedure and has no required
-companion docs, scripts, or model configuration. Modify it after copying: add the
-project's real commands, conventions, and chosen agent settings.
+Inspect your Codex environment, supported model and reasoning settings, and
+existing project instructions. Confirm preferences and role assignments through
+the adoption plan. The supplied policy is reference-only until approved; do not
+silently use its models or replace an existing policy.
 
-For another agent, use its supported skill location or copy the instructions into
-its existing workflow. These files do not install plugins, hooks, or schedules.
+After adoption, agree on a task, switch from planning to execution mode, and send
+`$ship-cycle execute`. Explicit invocation identifies the desired workflow;
+UI button behavior depends on the host and its instructions. Use `$code-sweep`
+for a findings-only audit, then choose any implementation work separately.
 
-Preserve the project's detailed safeguards during adoption. A worker-model change
-does not alter required checks or the independent review gate. If adopting both
-the skill and a focused workflow guide, resolve overlapping rules into consistent
-local guidance without leaving essential steps in a file that was not copied.
+For another product, adapt the skill location, policy format, and supported
+settings during adoption. These assets install no plugins, hooks, or schedules.

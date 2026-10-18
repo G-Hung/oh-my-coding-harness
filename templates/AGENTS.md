@@ -13,6 +13,9 @@
 - Protect user data and project state. Obtain approval before destructive or
   difficult-to-recover actions.
 - Keep implementation, tests, and documentation aligned with behavior changes.
+- Use an ASD-STE100-inspired style for documentation, comments, and docstrings.
+  Write short, direct sentences and use consistent terms. Preserve conditions,
+  exceptions, identifiers, commands, and tool directives.
 - Preserve useful invariants, examples, failure/recovery rules, and decision
   history. Remove repetition without dropping conditions that make a rule safe.
 - Use code, schemas, and tests to establish actual behavior when prose disagrees;
@@ -34,6 +37,7 @@ root; use them when present, along with the closest area instructions and README
 - `docs/agent-guidelines/verification.md`: checks, test quality, and local resources.
 - `docs/agent-guidelines/documentation.md`: behavior and README maintenance.
 - `docs/agent-guidelines/safety.md`: data, credentials, migrations, and external effects.
+- `docs/agent-guidelines/formal-verification.md`: bounded models and implementation conformance, when adopted.
 - `docs/readme-standard.md`: what a useful subsystem README should contain.
 
 <!-- TODO: After copying, keep only pointers to adopted or existing files and

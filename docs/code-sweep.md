@@ -1,9 +1,4 @@
----
-name: weekly-sweep
-description: Audit recent changes, active areas, dependencies, tests, and READMEs for a requested weekly sweep; report evidence and proposed fixes.
----
-
-# Weekly code sweep
+# Code sweep
 
 Review code changed in the last 1–2 weeks and the paths it affects. Find concrete
 improvements that make the system robust and easier for future AI agents to
@@ -31,6 +26,12 @@ isolated tests.
 integration-test prerequisites after copying. -->
 
 ## Delegation and integration-test ownership
+
+When using the skill, read the adopted model policy and model-selection guide
+before delegating. See the [code-sweep skill](../.agents/skills/code-sweep/SKILL.md)
+for its full copy dependencies. When using this document alone as a manual audit
+prompt, use the project's explicitly agreed execution policy; it supplies no
+model defaults and does not grant permission to delegate.
 
 Delegate useful independent read-only investigations under the adopted model
 policy; reuse agents and existing evidence rather than duplicating searches.

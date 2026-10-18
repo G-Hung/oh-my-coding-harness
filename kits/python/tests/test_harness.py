@@ -134,3 +134,128 @@ def test_links_parse_urls_before_decoding_files(project: Path, monkeypatch) -> N
     assert links.main() == 0
     (project / "literal?name.md").unlink()
     assert links.main() == 1
+
+
+def test_links_skip_code_and_follow_used_references() -> None:
+    source = """[full][Target] ![picture][image] [Collapsed][] [shortcut]
+
+[Target]: <some%20file.md#section> "title"
+[image]: image.png
+[Collapsed]: collapsed.md
+[shortcut]: shortcut.md
+[unused]: unused.md
+
+````md
+[bad](missing.md)
+```
+[bad][Target]
+````
+~~~md
+[bad](also-missing.md)
+~~~
+`[bad](inline.md)` and ``[bad](more-inline.md)``
+
+    [bad](indented.md)
+[real](guide.md) [remote](https://example.org)
+"""
+    assert links.local_targets(source) == [
+        "some file.md",
+        "image.png",
+        "collapsed.md",
+        "shortcut.md",
+        "guide.md",
+    ]
+
+
+def test_reference_link_missing_target_fails(project: Path, monkeypatch) -> None:
+    monkeypatch.setattr(links, "REPO_ROOT", project)
+    monkeypatch.setattr(links, "markdown_paths", lambda: ["README.md"])
+    monkeypatch.setattr(links, "contained", lambda path: contained(path, project))
+    (project / "README.md").write_text("[guide][ref]\n\n[ref]: missing.md\n")
+    assert links.main() == 1
+    (project / "missing.md").write_text("# Guide")
+    assert links.main() == 0
+
+
+def git_fixture(root: Path, *args: str) -> str:
+    return subprocess.run(
+        [
+            "git",
+            "-c",
+            "user.name=Harness Test",
+            "-c",
+            "user.email=test@example.invalid",
+            "-c",
+            "commit.gpgsign=false",
+            *args,
+        ],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+
+def test_readme_local_changes_before_first_commit(project: Path, monkeypatch) -> None:
+    monkeypatch.setattr(readmes, "REPO_ROOT", project)
+    git_fixture(project, "init", "-q")
+    git_fixture(project, "add", "src/example.py")
+    (project / "src/untracked.py").write_text("value = 3\n")
+    paths = readmes.changed_paths(worktree=True, base=None)
+    assert {"src/example.py", "src/untracked.py"}.issubset(paths)
+    assert readmes.changed_paths(worktree=False, base=None) == ["src/example.py"]
+
+
+def test_readme_keeps_staged_change_cancelled_by_worktree(project: Path, monkeypatch) -> None:
+    monkeypatch.setattr(readmes, "REPO_ROOT", project)
+    git_fixture(project, "init", "-q")
+    git_fixture(project, "add", ".")
+    git_fixture(project, "commit", "-qm", "baseline")
+    path = project / "src/example.py"
+    original = path.read_text()
+    path.write_text("value = 2\n")
+    git_fixture(project, "add", "src/example.py")
+    path.write_text(original)
+    assert "src/example.py" in readmes.changed_paths(worktree=True, base=None)
+    assert "src/example.py" in readmes.changed_paths(worktree=True, base="HEAD")
+
+
+def test_readme_branch_merge_base_renames_and_deletions(project: Path, monkeypatch) -> None:
+    monkeypatch.setattr(readmes, "REPO_ROOT", project)
+    git_fixture(project, "init", "-q")
+    git_fixture(project, "add", ".")
+    git_fixture(project, "commit", "-qm", "baseline")
+    baseline = git_fixture(project, "rev-parse", "HEAD")
+    git_fixture(project, "checkout", "-qb", "base")
+    (project / "src/base_only.py").write_text("value = 0\n")
+    git_fixture(project, "add", ".")
+    git_fixture(project, "commit", "-qm", "base update")
+    git_fixture(project, "checkout", "-qb", "feature", baseline)
+    git_fixture(project, "mv", "src/example.py", "src/renamed.py")
+    git_fixture(project, "commit", "-qm", "rename")
+    (project / "src/renamed.py").unlink()
+    paths = readmes.changed_paths(worktree=True, base="base")
+    assert {"src/example.py", "src/renamed.py"}.issubset(paths)
+    assert "src/base_only.py" not in paths
+
+
+def test_changed_readme_still_prompts_for_accuracy(project: Path, monkeypatch, capsys) -> None:
+    monkeypatch.setattr(readmes, "REPO_ROOT", project)
+    monkeypatch.setattr(readmes, "contained", lambda path: path)
+    (project / "README.md").write_text("# Changed but potentially stale")
+    readmes.report(["src/example.py", "README.md"])
+    result = capsys.readouterr().out
+    assert "README.md" in result and "verify accuracy" in result and "src/example.py" in result
+
+
+def test_links_distinguish_nested_content_from_code() -> None:
+    assert links.local_targets("- Parent\n    - [broken](missing.md)\n") == ["missing.md"]
+    assert links.local_targets("Paragraph continues\n    [guide](guide.md)\n") == ["guide.md"]
+    assert links.local_targets("    [example](not-a-link.md)\n") == []
+    assert links.local_targets(
+        "> ```md\n> [example](not-a-link.md)\n> ```\n> [real](guide.md)\n"
+    ) == ["guide.md"]
+    assert links.local_targets("[nested](path(with(parens)).md) [code `label`](real.md)") == [
+        "path(with(parens)).md",
+        "real.md",
+    ]

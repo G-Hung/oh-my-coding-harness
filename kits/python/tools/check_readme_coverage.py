@@ -50,21 +50,37 @@ def untracked_paths() -> list[str]:
 def changed_paths(*, worktree: bool, base: str | None) -> list[str]:
     """Return staged paths or all branch/worktree paths relative to a base."""
     if not worktree:
-        output = git_output("diff", "--cached", "--name-status", "-z", "--diff-filter=ACMRD")
+        output = git_output("diff", "--cached", "--name-status", "-z", "-M", "--diff-filter=ACMRDT")
         return sorted(set(parse_name_status(output)))
-    comparison = base or "HEAD"
-    comparison = git_output(
-        "rev-parse", "--verify", "--end-of-options", comparison + "^{commit}"
-    ).strip()
-    output = git_output(
-        "diff",
-        "--name-status",
-        "-z",
-        "--diff-filter=ACMRD",
-        comparison,
-        "--",
-    )
-    return sorted(set(parse_name_status(output) + untracked_paths()))
+    paths: set[str] = set(untracked_paths())
+    # Inspect the index and worktree separately: changes can cancel in a net diff.
+    for extra in (("--cached",), ()):
+        paths.update(
+            parse_name_status(
+                git_output(
+                    "diff", *extra, "--name-status", "-z", "-M", "--diff-filter=ACMRDT", "--"
+                )
+            )
+        )
+    if base:
+        revision = git_output(
+            "rev-parse", "--verify", "--end-of-options", base + "^{commit}"
+        ).strip()
+        merge_base = git_output("merge-base", revision, "HEAD").strip()
+        paths.update(
+            parse_name_status(
+                git_output(
+                    "diff",
+                    "--name-status",
+                    "-z",
+                    "-M",
+                    "--diff-filter=ACMRDT",
+                    f"{merge_base}..HEAD",
+                    "--",
+                )
+            )
+        )
+    return sorted(paths)
 
 
 def is_readme(path: str) -> bool:
@@ -104,8 +120,11 @@ def report(paths: list[str]) -> None:
             groups.setdefault("No README found: create or identify documentation", []).append(
                 source
             )
-        elif readme not in changed_readmes:
-            groups.setdefault(readme, []).append(source)
+        else:
+            status = (
+                "also changed; verify accuracy" if readme in changed_readmes else "review relevance"
+            )
+            groups.setdefault(f"{readme} ({status})", []).append(source)
     if not groups:
         print("README coverage: no nearby documentation review prompts.")
         return
@@ -125,11 +144,11 @@ def main() -> None:
     mode.add_argument(
         "--worktree",
         action="store_true",
-        help="Review branch, tracked worktree, and visible untracked changes.",
+        help="Review local changes, plus branch commits when --base is supplied.",
     )
     parser.add_argument(
         "--base",
-        help="Git revision to compare for --worktree (default: HEAD).",
+        help="Git base for committed branch changes; local changes are always included.",
     )
     args = parser.parse_args()
     if args.base and not args.worktree:

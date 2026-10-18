@@ -83,3 +83,26 @@ test('Markdown parser checks reference targets, skips fenced samples and rejects
   assert.match(result.stderr, /target missing/);
   assert.match(result.stderr, /escapes root/);
 });
+
+test('README with base retains staged changes cancelled by worktree and both rename paths', () => {
+  const root = project('readme-base');
+  const git = args => execFileSync('git', ['-c', 'user.name=Harness Test', '-c', 'user.email=test@example.invalid', '-c', 'commit.gpgsign=false', ...args], { cwd: root, encoding: 'utf8' }).trim();
+  git(['init', '-q']);
+  git(['add', '.']);
+  git(['commit', '-qm', 'baseline']);
+  const baseline = git(['rev-parse', 'HEAD']);
+  const source = path.join(root, 'src/example.ts');
+  const original = fs.readFileSync(source, 'utf8');
+  fs.writeFileSync(source, 'export const value = 2;\n');
+  git(['add', 'src/example.ts']);
+  fs.writeFileSync(source, original);
+  const staged = run(root, 'check-readme-coverage.cjs', ['--base', baseline]);
+  assert.equal(staged.status, 0, staged.stderr);
+  assert.match(staged.stdout, /src\/example.ts/);
+  git(['checkout', '--', 'src/example.ts']);
+  git(['mv', 'src/example.ts', 'src/renamed.ts']);
+  const renamed = run(root, 'check-readme-coverage.cjs', ['--base', baseline]);
+  assert.equal(renamed.status, 0, renamed.stderr);
+  assert.match(renamed.stdout, /src\/example.ts/);
+  assert.match(renamed.stdout, /src\/renamed.ts/);
+});

@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "models": [
+    {
+      "id": "fenced-cache",
+      "directory": "models/fenced-cache",
+      "spec": "ReadThroughCache.tla",
+      "implementation_files": [
+        "typescript/cache.ts"
+      ],
+      "checks": [
+        {
+          "config": "ReadThroughCache.cfg",
+          "kind": "baseline"
+        },
+        {
+          "config": "NoFillFence.cfg",
+          "kind": "negative",
+          "expected_invariant": "NoStaleResurrection"
+        },
+        {
+          "config": "NoJoinFence.cfg",
+          "kind": "negative",
+          "expected_invariant": "SameTokenJoin"
+        },
+        {
+          "config": "BlockedFillWitness.cfg",
+          "kind": "witness",
+          "expected_invariant": "NoBlockedFillWitness"
+        },
+        {
+          "config": "SameTokenJoinWitness.cfg",
+          "kind": "witness",
+          "expected_invariant": "NoSameTokenJoinWitness"
+        },
+        {
+          "config": "IndependentReadWitness.cfg",
+          "kind": "witness",
+          "expected_invariant": "NoIndependentReadWitness"
+        },
+        {
+          "config": "FailedInvalidationWitness.cfg",
+          "kind": "witness",
+          "expected_invariant": "NoFailedInvalidationWitness"
+        }
+      ]
+    }
+  ],
+  "conformance": [
+    {
+      "id": "typescript-cache",
+      "cwd": "typescript",
+      "argv": [
+        "node",
+        "--test",
+        "--test-reporter=tap",
+        "cache.test.ts"
+      ],
+      "inputs": [
+        "typescript/cache.ts",
+        "typescript/cache.test.ts",
+        "typescript/package.json"
+      ],
+      "tests_pattern": "# pass (?P<count>\\d+)",
+      "skips_pattern": "# skipped (?P<count>\\d+)"
+    }
+  ]
+}
