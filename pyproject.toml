@@ -1,0 +1,25 @@
+[project]
+name = "oh-my-coding-harness-maintenance"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+dev = ["ruff>=0.12,<1", "pyright>=1.1.400,<2"]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+include = ["tools/**/*.py", "examples/**/*.py"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pyright]
+include = ["tools", "examples"]
+exclude = ["**/__pycache__", "**/.cache", "**/node_modules"]
+pythonVersion = "3.12"
+typeCheckingMode = "standard"

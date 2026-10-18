@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "models": [
+    {
+      "id": "fenced-cache",
+      "directory": "models/fenced-cache",
+      "spec": "ReadThroughCache.tla",
+      "implementation_files": [
+        "python/cache.py"
+      ],
+      "checks": [
+        {
+          "config": "ReadThroughCache.cfg",
+          "kind": "baseline"
+        },
+        {
+          "config": "NoFillFence.cfg",
+          "kind": "negative",
+          "expected_invariant": "NoStaleResurrection"
+        },
+        {
+          "config": "NoJoinFence.cfg",
+          "kind": "negative",
+          "expected_invariant": "SameTokenJoin"
+        },
+        {
+          "config": "BlockedFillWitness.cfg",
+          "kind": "witness",
+          "expected_invariant": "NoBlockedFillWitness"
+        },
+        {
+          "config": "SameTokenJoinWitness.cfg",
+          "kind": "witness",
+          "expected_invariant": "NoSameTokenJoinWitness"
+        },
+        {
+          "config": "IndependentReadWitness.cfg",
+          "kind": "witness",
+          "expected_invariant": "NoIndependentReadWitness"
+        },
+        {
+          "config": "FailedInvalidationWitness.cfg",
+          "kind": "witness",
+          "expected_invariant": "NoFailedInvalidationWitness"
+        }
+      ]
+    }
+  ],
+  "conformance": [
+    {
+      "id": "python-cache",
+      "cwd": "python",
+      "argv": [
+        "{python}",
+        "-m",
+        "unittest",
+        "-v",
+        "test_cache"
+      ],
+      "inputs": [
+        "python/cache.py",
+        "python/test_cache.py"
+      ],
+      "tests_pattern": "Ran (?P<count>\\d+) tests?",
+      "skips_pattern": "skipped=(?P<count>\\d+)"
+    }
+  ]
+}

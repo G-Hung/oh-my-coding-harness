@@ -1,0 +1,10 @@
+# TODO: Match these paths and prefixes to your package layout.
+[[boundaries]]
+package_root = "src"
+source = "src/example/domain"
+forbidden = ["example.adapters", "example.presentation"]
+
+[[boundaries]]
+package_root = "src"
+source = "src/example/adapters"
+forbidden = ["example.presentation"]

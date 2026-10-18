@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+cd "$(git rev-parse --show-toplevel)"
+# Setup is explicit. A missing environment must fail rather than skip checks.
+exec uv run --frozen --offline --no-sync python tools/pre_commit.py "$@"
