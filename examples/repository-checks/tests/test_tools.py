@@ -113,7 +113,9 @@ class SelectionTests(unittest.TestCase):
                 "checks": [{"name": "python", "paths": ["src/*"], "command": ["true"]}],
                 "selection": {"ignore": ["*.md"]},
             }
-            self.assertEqual(["src/new.py", "src/old.py"], select_checks.plan(paths, config)[0]["paths"])
+            self.assertEqual(
+                ["src/new.py", "src/old.py"], select_checks.plan(paths, config)[0]["paths"]
+            )
             config["selection"]["ignore"] = []
             with self.assertRaisesRegex(ValueError, "notes.md"):
                 select_checks.plan(paths, config)
@@ -122,16 +124,20 @@ class SelectionTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "at least one"):
             select_checks.plan(["src/app.py"], {})
         with self.assertRaisesRegex(ValueError, "unique names"):
-            select_checks.plan(["src/app.py"], {
-                "checks": [
-                    {"name": "same", "paths": ["src/*"], "command": ["true"]},
-                    {"name": "same", "paths": ["*.py"], "command": ["true"]},
-                ]
-            })
+            select_checks.plan(
+                ["src/app.py"],
+                {
+                    "checks": [
+                        {"name": "same", "paths": ["src/*"], "command": ["true"]},
+                        {"name": "same", "paths": ["*.py"], "command": ["true"]},
+                    ]
+                },
+            )
         with self.assertRaisesRegex(ValueError, "path patterns"):
-            select_checks.plan(["src/app.py"], {
-                "checks": [{"name": "python", "paths": "src/*", "command": ["true"]}]
-            })
+            select_checks.plan(
+                ["src/app.py"],
+                {"checks": [{"name": "python", "paths": "src/*", "command": ["true"]}]},
+            )
 
     def test_staged_change_remains_selected_when_worktree_reverts_it(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -167,9 +173,11 @@ class SelectionTests(unittest.TestCase):
                     '[selection]\nignore = ["checks.toml"]\n',
                     encoding="utf-8",
                 )
-                with mock.patch.object(sys, "argv", [
-                    "select_checks.py", "--root", str(root), "--config", "checks.toml", "--run"
-                ]):
+                with mock.patch.object(
+                    sys,
+                    "argv",
+                    ["select_checks.py", "--root", str(root), "--config", "checks.toml", "--run"],
+                ):
                     self.assertEqual(expected, select_checks.main())
 
 

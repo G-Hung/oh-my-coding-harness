@@ -64,8 +64,10 @@ def check(root: Path, config: Path) -> list[str]:
         forbidden = rule["forbidden"]
         if not source.is_dir() or not source.is_relative_to(package_root):
             raise ValueError(f"missing source or outside package root: {rule['source']}")
-        if not isinstance(forbidden, list) or not forbidden or any(
-            not isinstance(item, str) or not item for item in forbidden
+        if (
+            not isinstance(forbidden, list)
+            or not forbidden
+            or any(not isinstance(item, str) or not item for item in forbidden)
         ):
             raise ValueError(f"invalid forbidden imports for {rule['source']}")
         paths = sorted(source.rglob("*.py"))

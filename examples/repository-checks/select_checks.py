@@ -12,9 +12,7 @@ from pathlib import Path
 
 
 def git(root: Path, *args: str) -> bytes:
-    return subprocess.run(
-        ["git", *args], cwd=root, check=True, capture_output=True
-    ).stdout
+    return subprocess.run(["git", *args], cwd=root, check=True, capture_output=True).stdout
 
 
 def name_status_paths(payload: bytes) -> set[str]:
@@ -40,11 +38,7 @@ def changed_paths(root: Path, base: str) -> list[str]:
     unstaged = git(root, "diff", "--name-status", "-z", "-M")
     untracked = git(root, "ls-files", "--others", "--exclude-standard", "-z")
     paths = name_status_paths(committed) | name_status_paths(staged) | name_status_paths(unstaged)
-    paths.update(
-        part.decode("utf-8", "surrogateescape")
-        for part in untracked.split(b"\0")
-        if part
-    )
+    paths.update(part.decode("utf-8", "surrogateescape") for part in untracked.split(b"\0") if part)
     return sorted(paths)
 
 
@@ -56,25 +50,33 @@ def plan(paths: list[str], config: dict) -> list[dict]:
     selected: list[dict] = []
     for rule in rules:
         name, patterns, command = rule["name"], rule["paths"], rule["command"]
-        if (not isinstance(name, str) or not isinstance(patterns, list)
-            or not isinstance(command, list) or name in names
-            or not patterns or not command or not all(
-            isinstance(item, str) and item for item in [name, *patterns, *command]
-        )):
+        if (
+            not isinstance(name, str)
+            or not isinstance(patterns, list)
+            or not isinstance(command, list)
+            or name in names
+            or not patterns
+            or not command
+            or not all(isinstance(item, str) and item for item in [name, *patterns, *command])
+        ):
             raise ValueError("checks need unique names, path patterns, and command arguments")
         names.add(name)
         matched = [
-            path for path in paths
+            path
+            for path in paths
             if any(fnmatch.fnmatchcase(path, pattern) for pattern in patterns)
         ]
-        selected.append({"name": name, "paths": matched, "command": command, "selected": bool(matched)})
+        selected.append(
+            {"name": name, "paths": matched, "command": command, "selected": bool(matched)}
+        )
     ignored = config.get("selection", {}).get("ignore", [])
     if not isinstance(ignored, list) or any(
         not isinstance(item, str) or not item for item in ignored
     ):
         raise ValueError("selection.ignore must be a list of nonempty patterns")
     uncovered = [
-        path for path in paths
+        path
+        for path in paths
         if not any(rule["selected"] and path in rule["paths"] for rule in selected)
         and not any(fnmatch.fnmatchcase(path, pattern) for pattern in ignored)
     ]

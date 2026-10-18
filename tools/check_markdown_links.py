@@ -32,8 +32,10 @@ def markdown_paths() -> list[str]:
         + git_paths("ls-files", "--others", "--exclude-standard", "-z", "--", "*.md")
     )
     return sorted(
-        path for path in candidates
-        if (REPO_ROOT / path).is_file() and not (REPO_ROOT / path).is_symlink()
+        path
+        for path in candidates
+        if (REPO_ROOT / path).is_file()
+        and not (REPO_ROOT / path).is_symlink()
         and REPO_ROOT in (REPO_ROOT / path).resolve().parents
     )
 
@@ -74,7 +76,9 @@ def main() -> int:
                 else (REPO_ROOT / markdown_path).parent / target
             )
             resolved = resolved.resolve()
-            if (resolved != REPO_ROOT and REPO_ROOT not in resolved.parents) or not resolved.exists():
+            if (
+                resolved != REPO_ROOT and REPO_ROOT not in resolved.parents
+            ) or not resolved.exists():
                 failures.append(f"{markdown_path}: {target}")
     if failures:
         print("Broken local Markdown links:", file=sys.stderr)

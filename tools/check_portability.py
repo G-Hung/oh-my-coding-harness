@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import re
-import sys
 import subprocess
+import sys
 from pathlib import Path
-
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -53,7 +52,10 @@ def should_check(path: Path) -> bool:
 def iter_repo_files() -> list[Path]:
     result = subprocess.run(
         ["git", "ls-files", "--cached", "--others", "--exclude-standard", "-z"],
-        cwd=REPO_ROOT, check=True, capture_output=True, text=True,
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
     )
     paths = set()
     for name in result.stdout.split("\0"):
@@ -88,7 +90,7 @@ def main() -> int:
     failures: list[str] = []
     for path in iter_repo_files():
         rel_path = path.relative_to(REPO_ROOT)
-        for lineno, match in find_violations(path):
+        for lineno, _match in find_violations(path):
             failures.append(f"{rel_path}:{lineno}: machine-specific absolute path")
 
     if failures:
@@ -96,7 +98,8 @@ def main() -> int:
         for failure in failures:
             print(f"  {failure}", file=sys.stderr)
         print(
-            "Use repo-relative paths instead, or add 'portability-check: ignore' for an intentional example.",
+            "Use repo-relative paths instead, or add 'portability-check: ignore' "
+            "for an intentional example.",
             file=sys.stderr,
         )
         return 1

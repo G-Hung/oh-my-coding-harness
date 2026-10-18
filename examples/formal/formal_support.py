@@ -24,7 +24,7 @@ def digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def contained(root: Path, name: str, *, directory: bool = False) -> Path:
+def contained(root: Path, name: object, *, directory: bool = False) -> Path:
     """Reject paths that escape the manifest root, including through symlinks."""
     if not isinstance(name, str) or not name or Path(name).is_absolute():
         raise VerificationError("Manifest paths must be nonempty relative paths")
