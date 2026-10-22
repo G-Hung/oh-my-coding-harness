@@ -1,0 +1,42 @@
+name: CodeQL
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  schedule:
+    - cron: '23 8 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [python, javascript-typescript]
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@793b778da9c9275a0f276522b27cb5fc14bba279 # v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+      - name: Analyze and report
+        uses: github/codeql-action/analyze@793b778da9c9275a0f276522b27cb5fc14bba279 # v4
+        with:
+          category: /language:${{ matrix.language }}

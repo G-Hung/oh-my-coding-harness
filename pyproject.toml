@@ -9,6 +9,7 @@ dev = ["ruff>=0.12,<1", "pyright>=1.1.400,<2"]
 
 [tool.uv]
 package = false
+required-version = ">=0.13.4"
 
 [tool.ruff]
 line-length = 100

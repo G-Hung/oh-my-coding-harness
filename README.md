@@ -1,5 +1,8 @@
 # oh-my-coding-harness
 
+[![CI](https://github.com/G-Hung/oh-my-coding-harness/actions/workflows/ci.yml/badge.svg?branch=master&event=push)](https://github.com/G-Hung/oh-my-coding-harness/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 Tools and workflows from [I Just Want My Coding Agent to Leave Me Alone](docs/articles/coding-agent-harness.md).
 Plan the work with your agent, let it implement, check, review, and fix the result,
 then use regular code sweeps to find problems that accumulate across changes.
@@ -87,5 +90,8 @@ only the checks and hook integration approved for their environment.
 
 Hooks are local and bypassable. Use the same commands in CI for shared enforcement.
 Cloning does not activate hooks, and installing them does not authorize a push.
+
+See [Contributing](CONTRIBUTING.md) for changes and the
+[security policy](SECURITY.md) for private vulnerability reports.
 
 [MIT license](LICENSE).

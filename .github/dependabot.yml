@@ -1,0 +1,38 @@
+version: 2
+updates:
+  - package-ecosystem: uv
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+    groups:
+      python-maintenance:
+        patterns: ['*']
+        update-types: [minor, patch]
+  - package-ecosystem: uv
+    directory: /kits/python
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+    groups:
+      python-kit:
+        patterns: ['*']
+        update-types: [minor, patch]
+  - package-ecosystem: npm
+    directory: /kits/typescript
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+    groups:
+      typescript-kit:
+        patterns: ['*']
+        update-types: [minor, patch]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+    groups:
+      actions:
+        patterns: ['*']
+        update-types: [minor, patch]

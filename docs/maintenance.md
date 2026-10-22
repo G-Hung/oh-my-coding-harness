@@ -7,7 +7,7 @@ hooks are the integration points, not a second implementation of the rules.
 
 ## One-time local setup
 
-Use Python 3.12+, uv, Node 24+, npm, and Git 2.38+. GitHub pre-push checks also
+Use Python 3.12+, uv 0.13.4+, Node 24.22.1, npm, and Git 2.38+. GitHub pre-push checks also
 need an authenticated GitHub CLI (`gh`) with `api --paginate --slurp` support.
 From the library root:
 
@@ -30,6 +30,32 @@ the tracked hook files and its own installed dependencies. Repeat prerequisites
 when a lockfile changes. Dependency commands use offline, no-sync mode: hooks do
 not install packages, audit registries, or run Java/TLC setup. Pre-push fetches the
 remote integration and peer refs into a disposable repository for the merge check below.
+
+## Certificate trust maintenance
+
+The [October 2026 Python advisory](https://discuss.python.org/t/information-for-python-users-regarding-emudhra-emsign-ca-certificate-security-incident/109576)
+requires uv 0.13.4+, pip 26.2.2+, and certifi 2026.10.19+ where installed.
+Both uv projects enforce the uv minimum. The Python kit constrains virtualenv to
+21.14.12+ because it bundles patched pip for the supported Python versions.
+The CI workflow pins patched uv and Node releases. Review these pins when new
+security releases appear; a package lockfile does not update its package manager.
+
+Update tools through their installation manager. For Homebrew-managed uv, use
+`brew upgrade uv` when an update is needed. Use `uv self update` only for a
+standalone uv installation. Check `uv --version` before fetching dependencies.
+Do not disable TLS verification or switch trust stores without checking them.
+
+Keep these uv environments pip-free. `python -m venv` or `ensurepip` can seed an
+older pip from the base interpreter, even when uv is patched. If an environment
+needs pip, use the advisory's checksum-pinned bootstrap procedure before its
+first package download. Updating a separate certifi package or the OS trust store
+does not replace pip's vendored certificate bundle. Inspect pip and certifi in
+each environment that uses them; updating one environment does not update others.
+
+Keep OS certificates and each tool's bundled trust store current. Rebuild applicable
+container images with updated base images and layer caching disabled. This library
+has no checked-in Docker image to rebuild. A patched uv does not establish that
+other tools, other environments, or the system trust store are patched.
 
 ## Which check runs when
 
@@ -136,3 +162,59 @@ the user wants it. The snapshot runners depend on each other and this library's
 layout, gate, and dependency paths; they are an integration example to adapt, not
 standalone scripts to paste into arbitrary projects. Read their complete context.
 No generic adoption approval permits replacing AGENTS.md or enabling hooks.
+
+## GitHub automation
+
+The CI workflow installs the locked root Python, Python kit, and TypeScript kit
+environments, then runs the same full maintenance gate. It runs on pull requests,
+pushes to `master`, and manual dispatch. It does not install hooks or run the
+remote pre-push merge check. Keep workflow branch filters and the README badge
+aligned if the default branch changes.
+
+CodeQL scans Python and JavaScript/TypeScript on pull requests, default-branch
+pushes, weekly schedules, and manual dispatch. It reports potential security
+defects in GitHub's code scanning results. Review alerts and fix valid findings;
+do not treat a completed analysis as proof that the code has no vulnerabilities.
+CodeQL uses advanced setup from the checked-in workflow. Do not enable a duplicate
+CodeQL default setup.
+
+Dependabot checks both uv projects, the TypeScript kit, and GitHub Actions weekly.
+Each configuration groups minor and patch version updates and permits at most
+three open version-update pull requests. Major updates remain separate. Security
+update pull requests use GitHub's separate security-update policy and limits.
+Review manifest and lockfile changes together. Require passing CI before merging;
+no workflow enables automatic merging. The formal TypeScript example has no
+package dependencies and needs no separate npm update entry.
+
+Actions use full commit hashes with version comments for Dependabot. CI uses
+read-only repository access. Only the CodeQL reporting job requests
+`security-events: write`. Pull request workflows use `pull_request` and do not
+receive repository secrets. Retain these limits when changing the workflows.
+
+The local gate remains offline. Dependency installation and hosted scanners use
+the network. Standard GitHub-hosted runners are free for public repositories;
+larger runners and storage above the included allowance can incur charges.
+These workflows use standard Ubuntu runners, disable uv caching, and do not add
+artifact uploads. See [GitHub Actions billing](https://docs.github.com/en/billing/concepts/product-billing/github-actions).
+
+### GitHub security activation
+
+The checked-in configuration does not prove that hosted services are active.
+After the files reach the default branch, a repository administrator must:
+
+1. Verify that the repository is public before relying on public-repository free
+   security features. This change does not change repository visibility.
+2. Enable or verify Dependabot alerts and Dependabot security updates. Check the
+   dependency graph for both Python lockfiles and the npm lockfile. Investigate
+   unsupported or missing dependency data before claiming vulnerability coverage.
+3. Enable or verify secret scanning and repository push protection.
+4. Enable private vulnerability reporting. Confirm that **Report a vulnerability**
+   is available in the Security tab.
+5. Confirm that Actions can run the pinned workflows. Confirm the first CI run
+   passes and both CodeQL languages report results without upload errors.
+6. Verify the README CI badge links to the default branch's run. Before the first
+   run on that branch, its status is not validation evidence.
+
+Use GitHub's [repository security settings guide](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-security-and-analysis-settings-for-your-repository).
+Settings changes and first hosted runs remain pending until verified on GitHub.
+Do not dispatch workflows or change repository settings as part of a local check.
