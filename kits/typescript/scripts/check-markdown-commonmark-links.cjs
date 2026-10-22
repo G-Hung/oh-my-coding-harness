@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { local, config, walk, cli } = require('./lib/project.cjs');
-// Uses a Markdown parser so reference links, escaped text and fenced code are handled correctly.
+// Check local CommonMark inline and reference links with unified and remark-parse.
 async function main() {
   if (process.argv.length > 2) throw new Error('No arguments expected');
   const { unified } = await import('unified');

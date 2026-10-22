@@ -2,12 +2,8 @@
 
 Use this rubric to write README files that help future editors work safely.
 
-It is written for both humans and AI agents. The goal is not to maximize
-documentation volume. The goal is to maximize future editing safety and speed.
-
-This is a rubric, not a rigid template. Keep the key signals strong, but if a
-README needs extra context that materially helps future editors and does not
-fit neatly into the suggested sections, include it.
+Write for humans and AI agents. Include what helps the next editor make a correct
+change; use the sections below as a menu.
 
 ## Purpose
 
@@ -29,8 +25,8 @@ code directly.
 
 - Use fictional examples; keep private records and credentials out of README files.
 - Prefer signal over exhaustiveness.
-- Preserve useful detail: conditions, exceptions, examples, recovery procedures,
-  and decision history. Concision is not a word-count target.
+- Keep conditions, examples, recovery procedures, and rationale that change an
+  editing or operating decision.
 - Document what is hard to infer from code.
 - Keep active guidance clearly separate from legacy or archive context.
 - Shrink low-value sections instead of expanding them.
@@ -187,16 +183,13 @@ Before keeping or adding a section, ask:
 - Does this help a future editor know what to read next?
 - Is this section likely to go stale faster than it provides value?
 
-If the answer to the last question is yes, correct or relocate the explanation
-to its maintained owner. Remove it only if it is obsolete or the useful detail
-remains available through a valid pointer; do not erase an important constraint
-merely because keeping it current requires work.
+Correct stale guidance or move it to its maintained owner. Remove obsolete or
+duplicated sections; keep a working pointer when readers still need the detail.
 
 ## Repo Expectation
 
 When a task changes a subsystem's active contracts, behavior, ownership, or
 historical guidance, update the relevant README in the same task.
 
-When a README becomes noisy, separate useful contracts and examples from stale
-or duplicated text. Preserve the former and delete or compress the latter. Check
-the before/after meaning, including conditions and exceptions, before finishing.
+When a README becomes noisy, keep useful contracts and examples and remove
+repetition. Review the changed meaning before finishing.

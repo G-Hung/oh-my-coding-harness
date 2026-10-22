@@ -17,11 +17,10 @@ credentials out of source, logs, reports, screenshots, and examples. Do not
 source an unknown environment file as shell code. Do not replace a blocked fake
 provider with live credentials just to make tests pass.
 
-Prefer ordinary code configuration for non-sensitive behavior settings. Adding, removing, or changing environment variables or their contract requires
-explicit approval for that configuration change; feature approval alone does not
-authorize new deployment settings. Account for all consumers and document the
-change. Authorization to change configuration never authorizes printing secrets.
-Never mistake a custom forbidden-text scan for a comprehensive secret scanner.
+Prefer ordinary code configuration for non-sensitive behavior settings. Handle
+routine configuration changes within the task's authorization; account for their
+consumers and document changed settings. Ask when an effect on deployment,
+credentials, cost, or a shared environment exceeds that authorization.
 
 ## Data and migrations
 

@@ -8,12 +8,15 @@ Document what a future editor cannot discover quickly from code: invariants,
 source of truth, recovery rules, reasons for a decision, and where to read next.
 Remove narrated code and stale inventories. Label archived guidance clearly.
 
-Preserve useful detail rather than optimizing word count. Conditions, exceptions,
-worked examples, failure/recovery steps, and decision history may prevent mistakes
-even when they make a guide longer. Before removing a rule, check its consumers
-and whether another maintained explanation preserves its meaning. When moving
-detail, keep a clear conditional pointer and verify the target is available to
-the reader. Independently copied material must retain its essential procedure.
+Keep conditions, examples, recovery steps, and rationale that change how a reader
+uses or edits the system. Merge repeated warnings and remove obsolete detail.
+When moving a procedure, keep it available to its consumers, including readers
+who copy the guide independently.
+
+Lead with the result or action. Add a limitation where it changes the reader's
+decision. For example, replace "Passing checks do not guarantee correctness, and
+some environments may differ" with "The unit tests pass; the database integration
+check is blocked because its service is unavailable." Omit unrelated caveats.
 
 ## Simplified Technical English
 
@@ -31,7 +34,7 @@ reference for the standard.
 - Use the same term for the same concept. Preserve distinctions such as missing
   versus zero, failed versus blocked, and model checking versus implementation tests.
 - Preserve requirement strength. Do not interchange `must`, `may`, and `must not`.
-- State limits, exceptions, failure behavior, and recovery steps explicitly.
+- State consequential limits, failure behavior, and recovery steps explicitly.
   Explain the reason for a constraint when code alone does not make it clear.
 - Avoid idioms, filler, dense noun phrases, and ambiguous pronouns.
 
@@ -54,8 +57,7 @@ Inspect overly broad README ownership or oversized content using the README
 rubric below. Check changed local links with the project's checker or inspect
 their targets directly when no checker is installed.
 
-Use the project's existing check commands. No other library document is required.
-Neither heuristics nor link checks establish semantic correctness.
+Use the project's existing check commands and review the changed meaning.
 
 ## README Rubric
 

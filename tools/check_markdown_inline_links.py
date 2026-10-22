@@ -1,4 +1,8 @@
-"""Check repository-local Markdown links without requesting network resources."""
+"""Check local inline Markdown links with the Python standard library.
+
+Reference links are not checked. For parser-based checking, use the Python kit's
+tools/check_markdown_commonmark_links.py with its documented dependencies.
+"""
 
 from __future__ import annotations
 

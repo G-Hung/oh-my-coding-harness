@@ -19,7 +19,7 @@ function config() {
   }
   for (const relative of [...value.sourceRoots, ...value.markdownRoots]) local(relative);
   for (const relative of value.exclude) local(relative, false);
-  if (value.extensions.some(x => !/^\.[a-z]+$/.test(x))) throw new Error('Invalid extensions');
+  if (value.extensions.some(x => !/^\.[a-z]+$/.test(x))) throw new Error('Invalid extensions: use final lowercase suffixes such as .ts, .vue, or .svelte; .d.ts is matched as .ts');
   if (!Number.isInteger(value.maxLines) || value.maxLines < 1) throw new Error('maxLines must be a positive integer');
   return value;
 }

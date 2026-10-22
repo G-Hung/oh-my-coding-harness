@@ -84,7 +84,7 @@ function inspect({ repo, base, target = 'HEAD', peers = [] }) {
       overlap: targetFiles.filter(file => peerFiles.has(file)) })
   }
   return { base, baseSha, target, targetSha, targetFiles, checks,
-    ok: checks.every(check => !check.conflict && check.overlap.length === 0) }
+    ok: checks.every(check => !check.conflict) }
 }
 
 function format(result) {

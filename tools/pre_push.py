@@ -1,4 +1,4 @@
-"""Run the full gate for each proposed pushed commit; never contact a remote."""
+"""Check pushed trees and their merge compatibility with the remote default branch."""
 
 from __future__ import annotations
 
@@ -7,7 +7,17 @@ import subprocess
 import sys
 from pathlib import Path
 
+from check_remote_conflicts import check_remote_conflicts
 from git_gate import check_tree, git
+
+
+def check_remote_merge(root: Path, payload: str, remote: str) -> None:
+    targets: list[tuple[str, str | None]] = [
+        (fields[1], fields[2])
+        for line in payload.splitlines()
+        if (fields := line.split())[2].startswith("refs/heads/") and set(fields[1]) != {"0"}
+    ]
+    check_remote_conflicts(root, remote, targets)
 
 
 def pushed_commits(payload: str) -> list[str]:
@@ -33,6 +43,8 @@ def main() -> int:
     try:
         payload = sys.stdin.read()
         commits = pushed_commits(payload) if payload.strip() else [git(root, "rev-parse", "HEAD")]
+        if payload.strip() and len(sys.argv) >= 3:
+            check_remote_merge(root, payload, sys.argv[2])
         for commit in commits:
             tree = git(root, "rev-parse", "--verify", "--end-of-options", f"{commit}^{{tree}}")
             if check_tree(root, tree, static_only=False):
@@ -42,8 +54,10 @@ def main() -> int:
                 )
                 return 1
         return 0
-    except (OSError, ValueError, subprocess.CalledProcessError) as exc:
+    except (OSError, ValueError, subprocess.SubprocessError) as exc:
         print(f"Pre-push blocked: {exc}", file=sys.stderr)
+        if isinstance(exc, subprocess.CalledProcessError) and exc.stderr:
+            print(exc.stderr, file=sys.stderr)
         return 1
 
 

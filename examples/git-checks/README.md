@@ -19,12 +19,14 @@ node --test tests/*.test.cjs
 The command checks whether the target can merge with the base and each peer.
 It also compares files changed from the base to the target and each peer.
 Rename source and destination paths both count as changed. A same-file overlap
-is a review signal, even if Git can merge the edits. Exit 0 means no conflict
-or overlap; exit 1 means at least one; exit 2 means the check failed. A missing
+is informational when Git can merge the edits. Exit 0 means no merge conflict;
+exit 1 means a merge conflict; exit 2 means the check failed. A missing
 ref, unrelated history, or Git error fails the check.
 
 Refs are local snapshots. The script does not discover pull requests or fetch
-new commits. To inspect open pull requests, list them explicitly with a read
+new commits. For automatic discovery and isolated fetching, use the optional
+[remote conflict check](../../tools/README.md#remote-conflict-check).
+To inspect selected pull requests manually, list them explicitly with a read
 query such as `gh pr list --state open --json number,headRefName --limit 100`.
 If a selected PR head is missing locally, an explicit fetch such as
 `git fetch origin pull/123/head:refs/remotes/origin/pr-123` creates or updates

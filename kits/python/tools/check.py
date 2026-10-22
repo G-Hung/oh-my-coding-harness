@@ -19,7 +19,7 @@ def commands(*, static_only: bool = False, tests_only: bool = False) -> list[lis
                 [sys.executable, "-m", "ruff", "format", "--check", "."],
                 [sys.executable, "-m", "ruff", "check", "."],
                 [sys.executable, "-m", "pyright"],
-                [sys.executable, "tools/check_markdown_links.py"],
+                [sys.executable, "tools/check_markdown_commonmark_links.py"],
                 [sys.executable, "tools/check_max_lines.py"],
             ]
         )

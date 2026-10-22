@@ -95,6 +95,46 @@ class SelectionTests(unittest.TestCase):
     def git(self, root: Path, *args: str) -> None:
         subprocess.run(["git", *args], cwd=root, check=True, capture_output=True)
 
+    def test_non_table_selection_has_cli_diagnostic(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.git(root, "init", "-q")
+            self.git(
+                root,
+                "-c",
+                "user.name=Fixture",
+                "-c",
+                "user.email=test@example.invalid",
+                "commit",
+                "--allow-empty",
+                "-qm",
+                "initial",
+            )
+            config = root / "checks.toml"
+            for selection in ('"invalid"', "[]"):
+                with self.subTest(selection=selection):
+                    config.write_text(
+                        f"selection = {selection}\n"
+                        '[[checks]]\nname = "sample"\npaths = ["*"]\ncommand = ["true"]\n',
+                        encoding="utf-8",
+                    )
+                    result = subprocess.run(
+                        [
+                            sys.executable,
+                            str(ROOT / "select_checks.py"),
+                            "--root",
+                            str(root),
+                            "--config",
+                            "checks.toml",
+                        ],
+                        capture_output=True,
+                        text=True,
+                        check=False,
+                    )
+                    self.assertEqual(2, result.returncode)
+                    self.assertIn("selection must be a table", result.stderr)
+                    self.assertNotIn("Traceback", result.stderr)
+
     def test_rename_untracked_and_uncovered_paths(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

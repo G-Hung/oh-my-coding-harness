@@ -2,6 +2,7 @@
 module.exports = {
   sourceRoots: ['src', 'scripts'],
   markdownRoots: ['.'],
+  // Final lowercase suffixes matched with path.extname; use .ts for .d.ts files.
   extensions: ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.mts', '.cts'],
   // TODO: document why each additional exclusion is appropriate; no glob syntax.
   exclude: ['node_modules', '.git', 'coverage', '.cache', 'dist'],

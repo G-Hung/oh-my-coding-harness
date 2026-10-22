@@ -2,6 +2,11 @@
 
 ## Core Principles
 
+- Lead with the result and next action. Include caveats when they change a decision,
+  explain a blocker, or bound a material claim.
+- Use checks that resolve a concrete uncertainty or satisfy an adopted gate. Once
+  these pass, proceed; add validation for changed behavior, new evidence, or a
+  specific unresolved risk.
 - Inspect the relevant implementation and nearby documentation before changing
   complex behavior.
 - Continue within the authorized scope until the requested outcome is complete.
@@ -29,16 +34,9 @@
 
 ## Project Reference Map
 
-Load only guidance relevant to the task. These paths are relative to the project
-root; use them when present, along with the closest area instructions and README.
-
-- `docs/agent-guidelines/workflow.md`: planning, ownership, review, and handoff.
-- `docs/agent-guidelines/code-style.md`: implementation, reuse, and refactoring.
-- `docs/agent-guidelines/verification.md`: checks, test quality, and local resources.
-- `docs/agent-guidelines/documentation.md`: behavior and README maintenance.
-- `docs/agent-guidelines/safety.md`: data, credentials, migrations, and external effects.
-- `docs/agent-guidelines/formal-verification.md`: bounded models and implementation conformance, when adopted.
-- `docs/readme-standard.md`: what a useful subsystem README should contain.
+Use `docs/agent-guidelines/README.md`, when adopted, to find guidance for the task.
+Read selected guides and the closest area instructions and README. Do not load
+the entire catalog. Project constraints and adopted workflow gates still apply.
 
 <!-- TODO: Only after explicit approval to create or adapt AGENTS.md, keep
 pointers to adopted or existing files and adjust their paths. Add essential

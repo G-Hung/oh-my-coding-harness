@@ -1,11 +1,5 @@
 # I Just Want My Coding Agent to Leave Me Alone
 
-> English text-only snapshot from the author's coding-agent article, source revision
-> `f725a01da74b0a37a0d14d70ef983f3b1f088c00`, captured 2026-10-18.
-> Images and their captions are omitted; the sweep skill name is updated.
-> This is background reading. The current [adoption guide](../adoption.md)
-> governs installation, including separate explicit approval for AGENTS.md edits.
-
 A year ago, AI was already pretty good at writing code. I was still the one sitting in front of an IDE, reading what it wrote, fixing things, and nudging it along. Then, toward the end of the year, coding agents got a lot better, very quickly. I started catching myself thinking, *Why am I still doing this part?* Before long, I barely wanted to open my IDE at all.
 
 Naturally, I went down the rabbit hole of how everyone else was using them. Skills, workflows, spec-driven development, context engineering, multi-agent orchestration, Ralph loops… Some genuinely useful ideas in there, but also an impressive number of shiny new things to learn, install, and manage.
@@ -163,36 +157,16 @@ I've mostly built and tested this in **OpenAI Codex**, but the workflow doesn't 
 
 Open **Plan Mode**, or your agent's equivalent planning workflow, and paste this in. It should compare the reference repo with your project and propose what to adopt, adapt, keep, or skip. You don't have to install everything.
 
-Also check which models it plans to hire. Please don't copy my entire staffing budget by accident. The plan should show who implements, who reviews, and which models and reasoning settings they use, so you can confirm or change the lineup.
+Use your existing agent settings unless you want different models for implementation
+and review. The reviewer needs a separate context and should follow the repairs
+through explicit approval; it can use the same model.
 
 ```text
 Read https://github.com/G-Hung/oh-my-coding-harness.
-Use its README's adoption instructions and asset list as
-your starting point.
-
-Inspect my project's instructions, code, architecture,
-languages, and existing checks. Assess the listed assets
-item by item, including ship-cycle, code-sweep, guidelines,
-and test gates. Recommend what to add, adapt, keep, or skip,
-with reasons specific to my project.
-
-Inspect the coding-agent product and execution environment,
-including available models and the model and reasoning
-settings supported for each role. Propose a main agent,
-helpers, and an independent reviewer, with supported
-reasoning settings. Briefly explain the quality, speed,
-and total-cost tradeoffs. Separate confirmed availability
-from access or settings that still need my input. Do not
-copy model defaults blindly. If a proposed role cannot use
-a model or setting here, propose a supported alternative.
-Include any model-policy changes in the same adoption plan
-and approval before applying them.
-
-Follow the README's approval process. Present one adoption
-plan for my explicit approval; I can approve it all or select
-items in one reply. Then carry out the approved scope.
-Never overwrite my existing AGENTS.md; propose targeted
-additions instead. Leave changes uncommitted for review.
+Inspect this library and my project. Recommend useful workflows, guides, and
+checks to adopt or adapt, while preserving what already works. Follow the
+adoption guide and present one grouped plan before making changes. Leave the
+result uncommitted for review.
 ```
 
 For Codex, once you've approved the plan and adopted `ship-cycle`, explicitly invoke the skill to run the agreed implementation, checks, review, and fix loop. Switch out of Plan Mode into execution mode when needed, then send:

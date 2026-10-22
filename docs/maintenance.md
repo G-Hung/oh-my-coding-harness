@@ -7,7 +7,9 @@ hooks are the integration points, not a second implementation of the rules.
 
 ## One-time local setup
 
-Use Python 3.12+, uv, Node 24+, npm, and Git. From the library root:
+Use Python 3.12+, uv, Node 24+, npm, and Git 2.38+. GitHub pre-push checks also
+need an authenticated GitHub CLI (`gh`) with `api --paginate --slurp` support.
+From the library root:
 
 ```sh
 uv sync --locked
@@ -25,8 +27,9 @@ forcing setup. Verify the result with `git config --show-origin --get core.hooks
 
 Git configuration can be shared across linked worktrees. Each worktree still needs
 the tracked hook files and its own installed dependencies. Repeat prerequisites
-when a lockfile changes. Hooks use offline, no-sync commands: they do not install
-packages, fetch refs, audit a remote registry, or run the Java/TLC setup.
+when a lockfile changes. Dependency commands use offline, no-sync mode: hooks do
+not install packages, audit registries, or run Java/TLC setup. Pre-push fetches the
+remote integration and peer refs into a disposable repository for the merge check below.
 
 ## Which check runs when
 
@@ -34,7 +37,7 @@ packages, fetch refs, audit a remote registry, or run the Java/TLC setup.
 | --- | --- | --- |
 | pre-commit | Root lockfile, Python formatting/lint/types, local Markdown paths, portability, Node syntax, Python kit static checks, TypeScript kit lint/types/links | Catch inexpensive errors before a commit exists. File-size prompts remain advisory. |
 | commit-msg | `type: description` or `type(scope): description`, optional `!` | Keep intent visible in history without controlling the body or description language. |
-| pre-push | The full gate, including maintenance/hook regression tests, standalone checks' tests, formal-runner and executable-cache tests, and both kits' full gates | Exercise behavior before sharing committed work. It does not run TLC model exploration. |
+| pre-push | Remote default-branch and open GitHub PR merge checks, then the full gate, including maintenance/hook regression tests, standalone checks' tests, formal-runner and executable-cache tests, and both kits' full gates | Detect merge conflicts and exercise behavior before sharing committed work. It does not run TLC model exploration. |
 
 The root Python environment checks maintenance scripts and Python examples. Each
 kit retains its own pinned dependencies and configuration. TypeScript typechecking
@@ -51,6 +54,30 @@ and skips deletions. Uncommitted repairs and unrelated HEAD commits cannot hide 
 bad pushed revision. Empty stdin during a direct manual invocation checks HEAD.
 A revision without the gate is blocked rather than treated as validated.
 
+For branch pushes, the runner discovers the remote default branch and fetches it
+into a temporary bare repository using the checkout's effective URL, SSH, HTTP,
+and credential settings. Git merge-tree checks each proposed branch against that
+snapshot and, when included in the push, the proposed default-branch
+revision. Conflicts block the push without changing local refs, the index, or the
+working tree. Remote access failures and a populated remote with no default HEAD
+also block the check; fix the reported cause and retry. Empty remotes have no
+integration base yet. Tags and deletions do not need a merge check. Manual runs
+without Git's remote arguments check local trees only.
+
+For standard github.com push URLs, the same checker queries every open PR targeting
+the default branch, including drafts, bots, and forks. It requires authenticated
+`gh` with `api --paginate --slurp`. It fetches PR heads into the same temporary
+repository and checks merge conflicts locally. The target's own PR is excluded
+only when source repository and pushed destination branch both match. Shared-file
+overlap without a conflict is informational. Query or fetch failures block;
+each remote operation has a 120-second timeout, with no retries or cache.
+
+Other hosts use Git-only checks and do not require `gh`. Use the standalone
+[remote conflict check](../tools/README.md#remote-conflict-check) for an explicit
+integration branch, additional peer branches, or a GitHub Enterprise repository.
+No PR code runs. CI must check integrated behavior; Git still enforces its normal
+push rules if the remote changes after this snapshot.
+
 Both runners reuse installed dependency environments, not their source files, from
 the originating checkout. Update those environments to match the relevant lockfiles
 before running checks. Dependencies and their caches are not isolated security
@@ -63,8 +90,8 @@ show the rerun command and the last 60 lines, capped at 12,000 characters. Logs
 survive snapshot cleanup; remove them after investigation. Clean runs delete their
 logs. Negative-test error output stays in the log rather than looking like a
 failed gate. This changes presentation only, not check selection or exit status.
-No remote access is performed by the gate. Git itself still needs explicit user
-authorization for an actual push.
+The full gate itself stays offline; remote access belongs to the pre-push merge
+check. Git still needs task authorization for an actual push.
 
 ## Fix the reported cause
 
@@ -97,7 +124,8 @@ The old initialization commit is historical and is not rewritten by these hooks.
 `tools/tests/test_git_hooks.py` drives actual Git commits and pushes against a
 throwaway local bare repository. It verifies rejected messages, scoped prefixes,
 staged failures hidden by unstaged fixes, successful repairs, exact pushed-object
-checks, and protection of existing hooks. Its tiny fixture gate avoids recursively
+checks, remote merge conflicts, multi-ref integration, and protection of existing hooks.
+Its tiny fixture gate avoids recursively
 running this same test suite. The real full gate separately checks the actual code.
 The tests never push this library or contact a hosted repository.
 

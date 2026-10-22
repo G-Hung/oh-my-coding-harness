@@ -4,46 +4,39 @@ Tools and workflows from [I Just Want My Coding Agent to Leave Me Alone](docs/ar
 Plan the work with your agent, let it implement, check, review, and fix the result,
 then use regular code sweeps to find problems that accumulate across changes.
 
-This is a library to adapt, not an installer or a replacement for your project's
-working tools. The skills and model settings started in Codex. Use them as a
-reference; your agent should inspect your environment and confirm the choices
-with you before adopting them.
+These are working examples of the article's ideas. Understand the problems they
+solve, compare your project's approach, and reuse or adapt what helps. Rust,
+Swift, or Go projects can connect their own formatting, static checks, and tests
+to the same feedback loop without importing a Python or TypeScript kit.
 
 ## Start with your agent
 
 Share this repository URL in Plan Mode, or paste:
 
 ```text
-Read the README and docs/adoption.md in this repository.
-Inspect my project's instructions, stack, checks, hooks, and agent environment.
-Read the complete relevant assets and assess what to add, adapt, keep, or skip.
-Explain dependencies and propose model roles, reasoning settings, reviewer,
-and fallback choices based on my available tools and preferences. Confirm those
-choices with me; the Codex configuration is a reference, not my default.
-Present one adoption plan before integrating anything. After approval, copy
-selected new assets and their dependencies first, then adapt them; merge approved
-changes into existing files. Do not recreate a shortened version from memory.
-Treat AGENTS.md as reference only. General adoption approval does not authorize
-editing it; suggest specific lessons separately for my explicit selection.
-Leave changes uncommitted. Do not install hooks, schedule, push, or publish
-unless those actions are explicitly authorized.
+Read https://github.com/G-Hung/oh-my-coding-harness.
+Inspect this library and my project. Recommend useful workflows, guides, and
+checks to adopt or adapt, while preserving what already works. Follow the
+adoption guide and present one grouped plan before making changes. Leave the
+result uncommitted for review.
 ```
 
-Agents: follow the [adoption guide](docs/adoption.md), including when the user only
-provides the repo link. Inspect first, agree on the selection and settings, then
-copy and adapt. The library's root AGENTS.md is for maintaining this library;
-it is not a file to copy into the user's project.
+Agents: follow the [adoption guide](docs/adoption.md), even for a repo-link-only
+request. The library's root AGENTS.md governs its maintenance, not the target.
 
-## What is here
+## Start with the problem
 
-| Asset | Use it for |
-| --- | --- |
-| [ship-cycle](.agents/skills/ship-cycle/SKILL.md) | Approved implementation, integration, required checks, one independent review/fix loop, and local handoff. |
-| [code-sweep](.agents/skills/code-sweep/SKILL.md) | A findings-only audit of recent work and affected areas, dependencies, tests, architecture, and documentation. No automatic fixes or schedule. |
-| [Model policy](.agents/model-policy.toml) | Configurable execution roles and a separate reviewer. Confirm models, reasoning, fixed/adaptive execution, and fallbacks with the user. |
-| [Guidelines](docs/agent-guidelines/README.md) and [README standard](docs/readme-standard.md) | Working principles, verification, safety, and useful documentation. The [AGENTS template](templates/README.md) is for comparison and optional lessons. |
-| [TypeScript](kits/typescript/README.md) and [Python](kits/python/README.md) kits | Runnable local checks, configuration, tests, and optional hook examples. Keep the target's existing stack when it already works. |
-| [Standalone tools and advanced examples](docs/assets.md) | Git conflicts/overlaps, npm audits, Python import boundaries, changed-path check selection, ports, documentation checks, and bounded formal verification. |
+| Problem | Minimum practice | Optional examples |
+| --- | --- | --- |
+| Checks get forgotten | Give the agent one check command and its failure output. | [TypeScript](kits/typescript/README.md) and [Python](kits/python/README.md) kits |
+| Design decisions get lost | Keep useful rationale near the code. | [README standard](docs/readme-standard.md) |
+| Implementation misses defects | Use an independent reviewer through repairs and explicit approval. | [ship-cycle](.agents/skills/ship-cycle/SKILL.md) |
+| Problems accumulate across changes | Periodically review recent code and recurring failures, then select fixes. | [code-sweep](.agents/skills/code-sweep/SKILL.md) |
+| Engineering guidance is hard to find | Keep focused notes and read them when relevant. | [Guidelines](docs/agent-guidelines/README.md), [AGENTS template](templates/README.md) |
+| Integration or resource conflicts escape local tests | Check affected boundaries with existing project tools. | [Standalone tools and advanced examples](docs/assets.md) |
+
+[Model preferences](.agents/model-policy.toml) are optional when host defaults
+are not enough. Adopt the practice using your existing tools before adding assets.
 
 Read the [asset catalog](docs/assets.md) for individual scripts, prerequisites,
 limitations, and hook details. File-size and README prompts are signals for review;
@@ -51,12 +44,12 @@ a passing check only supports the behavior it actually exercises.
 
 ## Use the adopted workflows
 
-Copy each skill with its [required dependencies](docs/adoption.md#skill-bundles-to-copy).
-The skill selects roles, the procedure defines the workflow, and the model policy
-holds the confirmed settings. Updating that policy changes subsequent assignments;
-it does not switch a running agent's model.
+Copy each selected skill using the [installation guide](docs/adoption.md#skill-bundles-to-copy).
+Each skill contains its workflow and uses the host's existing settings by default.
+Optional project preferences can name models; they do not configure the host.
 
-After agreeing on a task, switch to execution mode and explicitly invoke:
+After agreeing on a task, use your host's skill invocation. In Codex, switch to
+execution mode and invoke:
 
 ```text
 $ship-cycle execute
@@ -77,7 +70,11 @@ See [Codex adoption notes](adapters/codex/README.md) for layout and invocation.
 This repo uses its own checks. After the explicit [local setup](docs/maintenance.md),
 tracked Git hooks run fast static checks on the staged snapshot, validate commit
 subjects such as `feat(hooks): add checks`, and run the full gate on proposed pushed
-commits. A failure returns the command and error to the agent: fix, rerun, stage,
+commits. Before branch pushes, pre-push also checks merge compatibility with the
+remote's current default branch and, on GitHub, other open PRs targeting it.
+Same-file overlaps are informational; merge conflicts block the push. Checks use
+a temporary repository. A failure returns the
+command and error to the agent: fix, rerun, stage,
 and retry. Hooks never fix or stage files on your behalf.
 
 Run `uv run --frozen --offline --no-sync python tools/check.py` for the full gate,

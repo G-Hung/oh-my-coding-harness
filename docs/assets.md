@@ -1,13 +1,18 @@
 # Asset catalog
 
-Assess every category for fit; keep existing equivalents and skip irrelevant tools.
-For each selected tool, read its guide and copy all required helpers.
+Use these examples to understand the problems and compare your project's approach.
+Borrow useful ideas in its ecosystem; read each reused tool with its helpers.
 
 ## Detailed agent instructions
 
 Under `docs/agent-guidelines/` are detailed instructions on **how and what to do**.
 Copy only relevant documents or sections. General guides stand alone; use the
 [dependency bundles](adoption.md#skill-bundles-to-copy) for modular skills.
+
+Use the [topic index](agent-guidelines/README.md) to select compact engineering
+guides for design/reuse, contracts/naming, composition/patterns, state/recovery,
+debugging, and testing. They include practical examples; agents
+do not need to load the whole catalog. Keep only adopted links when copying an index.
 
 | File | What it tells the agent to do |
 | --- | --- |
@@ -18,7 +23,7 @@ Copy only relevant documents or sections. General guides stand alone; use the
 | [Safety](../docs/agent-guidelines/safety.md) | Handle credentials, environment changes, migrations, external effects, and shared resources. |
 | [Formal verification](../docs/agent-guidelines/formal-verification.md) | Choose a bounded protocol, map transitions to code, test negative controls and reachability, and report what the evidence covers. |
 | [README standard](../docs/readme-standard.md) | Write useful subsystem, feature, and small-folder READMEs: ownership, invariants, decisions, verification, and history instead of narrated code. |
-| [Code sweep document](../docs/code-sweep.md) | The audit procedure in plain Markdown, usable directly or as the prompt for your own scheduled task. No skill installation required; use your agreed execution policy for delegation. |
+| [Code-sweep skill](../.agents/skills/code-sweep/SKILL.md) | Review recent work and recurring avoidable problems; report improvements without implementing fixes. Its workflow is contained in the skill. |
 
 ## Scripts and stack setup
 
@@ -28,8 +33,8 @@ standalone examples below. They include editable roots, exclusions, and limits.
 | Check | TypeScript | Python | Purpose |
 | --- | --- | --- | --- |
 | Maximum file lines | [check-loc.cjs](../kits/typescript/scripts/check-loc.cjs) | [check_max_lines.py](../kits/python/tools/check_max_lines.py) | Report oversized files for refactoring review. Configurable limit; `--strict` makes it blocking. |
-| README coverage | [check-readme-coverage.cjs](../kits/typescript/scripts/check-readme-coverage.cjs) | [check_readme_coverage.py](../kits/python/tools/check_readme_coverage.py) | Identify nearby READMEs that may need updates after source changes. Advisory; the agent must review accuracy. |
-| Markdown links | [check-links.cjs](../kits/typescript/scripts/check-links.cjs) | [check_markdown_links.py](../kits/python/tools/check_markdown_links.py) | Detect broken local documentation links. The Python kit requires `markdown-it-py`; the TypeScript kit uses its declared parser dependencies. |
+| Nearest existing README reminder | [check-readme-coverage.cjs](../kits/typescript/scripts/check-readme-coverage.cjs) | [check_readme_coverage.py](../kits/python/tools/check_readme_coverage.py) | Prompt review of the closest existing README, falling back to the root README. Advisory; it does not require a README in every module. |
+| Markdown links | [check-markdown-commonmark-links.cjs](../kits/typescript/scripts/check-markdown-commonmark-links.cjs) | [check_markdown_commonmark_links.py](../kits/python/tools/check_markdown_commonmark_links.py) | Detect broken local documentation links. The Python kit requires `markdown-it-py`; the TypeScript kit uses its declared parser dependencies. |
 | Slow tests | [test-profile.cjs](../kits/typescript/scripts/test-profile.cjs) + [test-profile-summary.cjs](../kits/typescript/scripts/test-profile-summary.cjs) | `pytest --durations=15` | Show the most expensive tests so agents can investigate setup and runtime costs. |
 | Combined checks | [check-local.cjs](../kits/typescript/scripts/check-local.cjs) | [check.py](../kits/python/tools/check.py) | Run the configured checks and return a failing exit status when a required check fails. |
 | Setup diagnosis | [check-doctor.cjs](../kits/typescript/scripts/check-doctor.cjs) | `uv sync --locked` for setup; the combined gate verifies tools | Identify missing runtime/tooling prerequisites. Dependency installation is a separate setup step. |
@@ -59,6 +64,7 @@ existing scripts or hooks after approving the adoption plan.
 | Tool | What it provides | When to use it |
 | --- | --- | --- |
 | [Git conflicts and overlaps](../examples/git-checks/README.md) | Check a target commit against a base and selected peer refs; report merge conflicts and files changed by both branches. | Multiple branches or agents work in the same repository. Uses Node and Git. |
+| [Remote and PR conflicts](../tools/README.md#remote-conflict-check) | Fetch the integration branch, open GitHub PR heads, and selected remote branches; block merge conflicts while allowing clean same-file overlaps. | Check local commits before pushing. Uses Python and Git, plus authenticated `gh` for GitHub PR discovery. |
 | [npm dependency audit](../examples/git-checks/README.md) | Audit the locked dependency graph, including development dependencies, at a selected severity threshold; reject malformed reports and manifest/lockfile mismatches. | A project uses npm and a package lockfile. Accepts a saved report or an explicitly requested online audit. |
 | [Python import boundaries](../examples/repository-checks/README.md) | Check absolute and relative imports against configured module boundaries. | A Python project has layers that must remain independent. |
 | [Changed-path check selection](../examples/repository-checks/README.md) | Map changed paths to configured checks, show the plan, and run selected commands when requested. | A repository has several areas with different checks. The commands can use any language; the planner runs on Python. |
@@ -85,7 +91,7 @@ Both kits include working examples. **Copying the files does not enable them.**
 | Kit | Before commit | Before push | Files and setup |
 | --- | --- | --- | --- |
 | TypeScript | Lint, types, and advisory staged README prompts | Full configured gate: lint, types, tests, harness tests, file-size prompts, and local links | [pre-commit](../kits/typescript/hooks/pre-commit), [pre-push](../kits/typescript/hooks/pre-push), [setup](../kits/typescript/README.md#pre-commit-and-pre-push) |
-| Python | Lockfile, format, lint, types, local links, and file-size prompts | The same checks plus tests | [.pre-commit-config.yaml](../kits/python/.pre-commit-config.yaml), [setup](../kits/python/README.md#pre-commit-and-pre-push) |
+| Python | Static checks and advisory staged README prompts | Static checks plus tests | [.pre-commit-config.yaml](../kits/python/.pre-commit-config.yaml), [setup](../kits/python/README.md#pre-commit-and-pre-push) |
 
 Ask the adopting agent to inspect the existing hook manager and effective hook
 directory, propose how to merge these checks, and include activation in its

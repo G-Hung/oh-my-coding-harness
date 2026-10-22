@@ -1,4 +1,4 @@
-"""Check repository-local Markdown links without requesting network resources."""
+"""Check local CommonMark inline and reference links using markdown-it-py."""
 
 from __future__ import annotations
 
@@ -46,7 +46,11 @@ def local_targets(markdown: str) -> list[str]:
 def main() -> int:
     """Report broken local Markdown paths."""
     failures: list[str] = []
-    paths = markdown_paths()
+    try:
+        paths = markdown_paths()
+    except (OSError, ValueError) as exc:
+        print(f"Markdown discovery failed: {exc}", file=sys.stderr)
+        return 1
     for markdown_path in paths:
         source = (REPO_ROOT / markdown_path).read_text(encoding="utf-8")
         for target in local_targets(source):
@@ -55,9 +59,13 @@ def main() -> int:
                 if target.startswith("/")
                 else (REPO_ROOT / markdown_path).parent / target
             )
-            contained(resolved)
+            try:
+                contained(resolved)
+            except ValueError as exc:
+                failures.append(f"{markdown_path}: {target}: {exc}")
+                continue
             if not resolved.exists():
-                failures.append(f"{markdown_path}: {target}")
+                failures.append(f"{markdown_path}: {target}: target does not exist")
     if failures:
         print("Broken local Markdown links:", file=sys.stderr)
         for failure in failures:

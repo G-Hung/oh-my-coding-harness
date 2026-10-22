@@ -19,7 +19,7 @@ def load(name: str) -> Any:
     return module
 
 
-links = load("check_markdown_links")
+links = load("check_markdown_inline_links")
 portability = load("check_portability")
 
 
