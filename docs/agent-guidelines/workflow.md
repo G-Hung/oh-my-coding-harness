@@ -31,6 +31,9 @@ Follow the project's adopted coordination, review, and validation requirements.
 
 Report what changed, why, what was verified, and what remains uncertain. Distinguish
 completed work from proposed follow-up and local preparation from publication.
-State Git status and any owned resources still running. Leave work unstaged and
-uncommitted unless authorized; pushing and publishing require task authorization.
+State Git status and any owned resources still running. Follow the selected
+workflow's commit policy. Ship-cycle commits reviewed task changes before handoff
+unless the user explicitly requests an uncommitted result. Without an adopted
+commit policy or task authorization, leave work unstaged and uncommitted.
+Pushing and publishing require task authorization.
 Never bypass checks or claim an unavailable check passed.
