@@ -14,7 +14,9 @@ checkout and scope. Follow concrete leads beyond recent changes when useful.
 
 Use these as directions, not an exhaustive checklist:
 
-- Security, dependencies, correctness, and failure/recovery paths.
+- Security, correctness, and failure/recovery paths.
+- Packages, runtimes, and tools: check current upstream advisories, support status,
+  deprecations, and compatibility changes that need attention.
 - Duplicated rules, unclear ownership, awkward abstractions, and useful refactoring.
 - Missing behavioral coverage, redundant or costly tests, and performance risks.
 - Stale or conflicting documentation and guidance that is hard to discover.
