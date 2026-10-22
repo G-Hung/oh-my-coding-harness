@@ -5,7 +5,7 @@ to the root README. Review its relevance; a local README is not required per mod
 
 Copy this directory's contents into a project root, including `tools/`, `harness.toml`, and hidden files. For an existing project, merge configuration into its existing `pyproject.toml` and preserve its package manager, dependencies, hooks, and test conventions. Copy first, then adapt; the example `src/example` and its test exist only to demonstrate working wiring.
 
-Requires Python 3.12+, uv, and Git for changed-file README prompts. Install dependencies once with network access:
+Requires Python 3.12+, uv 0.13.4+, and Git for changed-file README prompts. Install dependencies once with network access:
 
 ```sh
 uv sync --locked
@@ -13,6 +13,26 @@ uv run --frozen --offline python tools/check.py
 ```
 
 The checked-in lockfile makes this example reproducible. After merging dependencies into an existing project, run `uv lock` and `uv sync`, review the resulting dependency changes, then run the gate again. A missing dependency, invalid configuration, or failed command fails the gate. No tool fixes files during validation.
+
+## Certificate trust prerequisites
+
+This kit requires uv 0.13.4+ and constrains virtualenv to 21.14.12+ so that its
+Python 3.12+ environments use the patched pip seed. Preserve these constraints
+when merging the kit into a project. See the
+[Python certificate advisory](https://discuss.python.org/t/information-for-python-users-regarding-emudhra-emsign-ca-certificate-security-incident/109576).
+
+Update uv through its installation manager: use `brew upgrade uv` for Homebrew,
+or `uv self update` for the standalone installation. Verify `uv --version` before
+installing dependencies. The uv environment does not need pip installed.
+
+`python -m venv` and `ensurepip` can seed older pip from the base interpreter.
+If an environment needs pip, follow the advisory's checksum-pinned bootstrap
+procedure before downloading packages. Require pip 26.2.2+ and certifi
+2026.10.19+ where installed. Pip vendors its own certifi bundle; updating a
+separate certifi package or the OS certificates does not replace that bundle.
+Check each environment separately. Keep system certificates and bundled trust
+stores current, and rebuild applicable container images with updated base images
+and layer caching disabled. Do not disable certificate verification.
 
 ## Choose a layer
 
