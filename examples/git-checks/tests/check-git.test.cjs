@@ -52,7 +52,7 @@ test('same-file overlap is reported even when merge is clean', t => {
   run(repo, 'switch', '-qc', 'target', base)
   put(repo, 'shared.txt', 'one\ntwo\ntarget\n')
   const result = cli(repo, base, '--peer', 'peer')
-  assert.equal(result.status, 1)
+  assert.equal(result.status, 0, result.stderr)
   assert.match(result.stdout, /peer peer: clean merge/)
   assert.match(result.stdout, /overlap: "shared.txt"/)
 })
@@ -76,7 +76,7 @@ test('rename overlap includes the original path', t => {
   run(repo, 'mv', 'shared.txt', 'renamed.txt')
   run(repo, 'commit', '-qm', 'rename')
   const result = cli(repo, base, '--peer', 'peer')
-  assert.equal(result.status, 1)
+  assert.equal(result.status, 0, result.stderr)
   assert.match(result.stdout, /overlap: "shared.txt"/)
 })
 

@@ -45,7 +45,7 @@ Use an existing local Git ref for `--base`. `HEAD` selects current staged,
 unstaged, and untracked changes; a branch also includes commits since their
 merge base. Git ignored files are excluded. The example commands assume `uv`
 and a Python test suite. The documentation command also assumes a
-`tools/check_markdown_links.py` helper. Copy that helper from the library or
+`tools/check_markdown_inline_links.py` helper. Copy that helper from the library or
 replace the command with the target project's existing documentation check.
 For an existing virtual environment, use the project's own `uv run` options.
 

@@ -10,6 +10,14 @@ repos:
         pass_filenames: false
         always_run: true
         stages: [pre-commit]
+      - id: python-readme
+        name: Staged README reminder
+        entry: uv run --frozen --offline python tools/check_readme_coverage.py --staged
+        language: system
+        pass_filenames: false
+        always_run: true
+        verbose: true
+        stages: [pre-commit]
       - id: python-full
         name: Python full checks
         entry: uv run --frozen --offline python tools/check.py

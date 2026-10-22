@@ -7,7 +7,7 @@ command = ["uv", "run", "python", "-m", "unittest", "discover", "-s", "tests"]
 [[checks]]
 name = "documentation"
 paths = ["*.md", "docs/*"]
-command = ["uv", "run", "python", "tools/check_markdown_links.py"]
+command = ["uv", "run", "python", "tools/check_markdown_inline_links.py"]
 
 [selection]
 # List only paths that genuinely need no check. Every other change must match.

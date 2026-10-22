@@ -20,7 +20,7 @@ Edit the TODOs in [configuration](harness.config.cjs): source roots, Markdown ro
 | `npm run test:harness` | Behavioral tests for the copied tooling |
 | `npm run check:loc` | Advisory list of source files above 500 physical lines by default, including blank lines and comments |
 | `npm run check:loc -- --strict --max-lines 500` | Blocking line limit; change config/check command if this belongs in your gate |
-| `npm run check:readme` | Advisory nearest README prompts for staged, unstaged and untracked source changes |
+| `npm run check:readme` | Advisory nearest existing README prompts for staged, unstaged and untracked source changes; falls back to the root README |
 | `npm run check:readme -- --staged` | Only staged paths; reads current working-copy README files |
 | `npm run check:readme -- --base main` | Merge-base-to-working-tree changes plus untracked files; fails for invalid base |
 | `npm run check:links` | Blocking local Markdown link/image destination existence check |

@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 import check
-import check_markdown_links as links
+import check_markdown_commonmark_links as links
 import check_readme_coverage as readmes
 import pytest
 from harness import ROOT, config, contained, files
@@ -55,7 +57,7 @@ def test_link_targets_handle_titles_anchors_and_encoding() -> None:
     ) == ["some file.md"]
 
 
-def test_links_fail_for_missing_and_escaping_targets(project: Path, monkeypatch) -> None:
+def test_links_fail_for_missing_and_escaping_targets(project: Path, monkeypatch, capsys) -> None:
     monkeypatch.setattr(links, "REPO_ROOT", project)
     monkeypatch.setattr(links, "markdown_paths", lambda: ["README.md"])
     monkeypatch.setattr(links, "contained", lambda path: contained(path, project))
@@ -63,9 +65,36 @@ def test_links_fail_for_missing_and_escaping_targets(project: Path, monkeypatch)
     assert links.main() == 1
     (project / "README.md").write_text("[source](src/example.py)")
     assert links.main() == 0
-    (project / "README.md").write_text("[escape](../outside.md)")
-    with pytest.raises(ValueError, match="escapes"):
-        links.main()
+    capsys.readouterr()
+    (project / "README.md").write_text(
+        "[escape](../outside.md) [missing](missing.md) [source](src/example.py)"
+    )
+    assert links.main() == 1
+    errors = capsys.readouterr().err
+    assert "README.md: ../outside.md: Path escapes project root" in errors
+    assert "README.md: missing.md: target does not exist" in errors
+    assert "src/example.py" not in errors
+
+
+def test_link_discovery_escape_has_cli_diagnostic(project: Path, tmp_path: Path) -> None:
+    shutil.copytree(ROOT / "tools", project / "tools", dirs_exist_ok=True)
+    outside = tmp_path.parent / (tmp_path.name + "-outside.md")
+    outside.write_text("# Outside\n")
+    try:
+        (project / "escape.md").symlink_to(outside)
+        result = subprocess.run(
+            [sys.executable, str(project / "tools/check_markdown_commonmark_links.py")],
+            cwd=project,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert result.returncode == 1
+        assert "Markdown discovery failed: Path escapes project root" in result.stderr
+        assert "escape.md" in result.stderr
+        assert "Traceback" not in result.stderr
+    finally:
+        outside.unlink()
 
 
 def test_name_status_preserves_renames_and_newlines() -> None:
@@ -97,6 +126,32 @@ def test_missing_readme_is_advisory(project: Path, monkeypatch, capsys) -> None:
 def test_check_modes() -> None:
     assert check.commands(tests_only=True) == [[check.sys.executable, "-m", "pytest"]]
     assert all("pytest" not in command for command in check.commands(static_only=True))
+
+
+def test_precommit_readme_reminder_is_visible_and_advisory(project: Path) -> None:
+    """Run the adopted hook, including its staged selection and successful output."""
+    shutil.copytree(ROOT / "tools", project / "tools", dirs_exist_ok=True)
+    for name in (".pre-commit-config.yaml", "pyproject.toml", "uv.lock"):
+        shutil.copy(ROOT / name, project)
+    subprocess.run(["git", "init", "-q", str(project)], check=True)
+    subprocess.run(["git", "add", "."], cwd=project, check=True)
+    env = os.environ.copy()
+    env.update(
+        PRE_COMMIT_HOME=str(project / ".pre-commit-cache"),
+        UV_PROJECT_ENVIRONMENT=sys.prefix,
+        UV_NO_SYNC="1",
+    )
+    result = subprocess.run(
+        [sys.executable, "-m", "pre_commit", "run", "python-readme"],
+        cwd=project,
+        env=env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "No README found" in result.stdout
+    assert "src/example.py" in result.stdout
 
 
 def test_max_lines_strict_and_empty_inventory(project: Path, monkeypatch) -> None:

@@ -1,5 +1,8 @@
 # Python kit
 
+The README reminder selects the nearest existing README, including a fallback
+to the root README. Review its relevance; a local README is not required per module.
+
 Copy this directory's contents into a project root, including `tools/`, `harness.toml`, and hidden files. For an existing project, merge configuration into its existing `pyproject.toml` and preserve its package manager, dependencies, hooks, and test conventions. Copy first, then adapt; the example `src/example` and its test exist only to demonstrate working wiring.
 
 Requires Python 3.12+, uv, and Git for changed-file README prompts. Install dependencies once with network access:
@@ -24,7 +27,7 @@ uv run --frozen --offline pytest tests/test_harness.py -q
 uv run --frozen --offline python tools/check_readme_coverage.py --staged
 uv run --frozen --offline python tools/check_readme_coverage.py --worktree --base HEAD
 # Independent checks
-uv run --frozen --offline python tools/check_markdown_links.py
+uv run --frozen --offline python tools/check_markdown_commonmark_links.py
 uv run --frozen --offline python tools/check_max_lines.py
 uv run --frozen --offline python tools/check_max_lines.py --strict
 ```
@@ -65,6 +68,7 @@ from the target project's Git root.
    uv sync --locked
    uv run --frozen --offline pre-commit validate-config
    uv run --frozen --offline pre-commit run python-static --hook-stage pre-commit --all-files
+   uv run --frozen --offline pre-commit run python-readme --hook-stage pre-commit --all-files
    uv run --frozen --offline pre-commit run python-full --hook-stage pre-push --all-files
    ```
 
@@ -86,7 +90,9 @@ from the target project's Git root.
    verification in each checkout. Reinstall after moving or recreating an
    environment if a launcher points to an obsolete interpreter.
 
-Pre-commit runs static checks; pre-push adds tests. A required command failure
+Pre-commit runs static checks and a visible staged README reminder; pre-push adds
+tests. The reminder is advisory and runs separately from the static gate because
+it needs the kit at the Git project root. A required command failure
 blocks the operation. The default file-size check remains advisory. Neither stage
 modifies files or checks commit messages. The configured commands run offline
 after dependency setup and inspect the current worktree, not an isolated index

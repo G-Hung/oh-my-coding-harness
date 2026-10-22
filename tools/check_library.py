@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 CHECKS = (
     ("repository portability", "check_portability.py"),
-    ("Markdown links", "check_markdown_links.py"),
+    ("Markdown links", "check_markdown_inline_links.py"),
 )
 
 

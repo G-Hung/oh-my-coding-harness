@@ -2,6 +2,11 @@
 
 ## First principles
 
+- Lead with the result and next action. Include caveats when they change a decision,
+  explain a blocker, or bound a material claim.
+- Use checks that resolve a concrete uncertainty or satisfy an adopted gate. Once
+  these pass, proceed; add validation for changed behavior, new evidence, or a
+  specific unresolved risk.
 - Understand the behavior before editing its code or instructions. Inspect callers,
   tests, and copy requirements; preserve useful existing implementations.
 - Complete the authorized scope, preserve unrelated work, and resolve routine
@@ -37,6 +42,8 @@
 - `docs/agent-guidelines/`: detailed behavior templates; edit the relevant guide
   when a procedure changes. These are library content, not automatically active
   requirements for every maintenance task.
+- Use `docs/agent-guidelines/README.md` to select relevant engineering guidance.
+  Do not load the whole catalog or activate unrelated workflow templates.
 - `docs/readme-standard.md`: README content and organization.
 - `docs/agent-guidelines/documentation.md`: the practical ASD-STE100 adaptation.
 - Before implementation, read `docs/maintenance.md`. This checkout uses tracked

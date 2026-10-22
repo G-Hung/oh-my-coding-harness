@@ -39,6 +39,17 @@ test('source scanning rejects symlinks instead of reading outside root', () => {
   fs.symlinkSync(os.tmpdir(), path.join(root, 'src/external'));
   assert.match(run(root, 'check-loc.cjs').stderr, /Symlink/);
 });
+test('extension configuration uses final suffixes and explains compound suffixes', () => {
+  const root = project('extensions', { extensions: ['.ts', '.vue', '.svelte'] });
+  fs.writeFileSync(path.join(root, 'src/types.d.ts'), 'export type Name = string;\n');
+  fs.writeFileSync(path.join(root, 'src/view.vue'), '<template />\n');
+  fs.writeFileSync(path.join(root, 'src/view.svelte'), '<p>hello</p>\n');
+  const { config, sourceFiles } = require(path.join(root, 'scripts/lib/project.cjs'));
+  assert.deepEqual(sourceFiles(config()), ['src/example.ts', 'src/types.d.ts', 'src/view.svelte', 'src/view.vue']);
+  const invalid = run(project('compound-extension', { extensions: ['.d.ts'] }), 'check-loc.cjs');
+  assert.equal(invalid.status, 1);
+  assert.match(invalid.stderr, /final lowercase suffixes.*\.d\.ts is matched as \.ts/);
+});
 test('NUL diff parsing retains both sides of renames and unusual filenames', () => {
   assert.deepEqual(parseNames('R100\0src/old.ts\0src/new\nname.ts\0D\0src/a b.ts\0'), ['src/old.ts', 'src/new\nname.ts', 'src/a b.ts']);
 });
@@ -75,10 +86,10 @@ test('Markdown parser checks reference targets, skips fenced samples and rejects
   fs.symlinkSync(path.join(__dirname, '../node_modules'), path.join(root, 'node_modules'));
   fs.writeFileSync(path.join(root, 'a b.md'), '# Target');
   fs.writeFileSync(path.join(root, 'README.md'), '[target][ref]\n\n[ref]: a%20b.md#unchecked\n\n```md\n[example](missing.md)\n```\n');
-  const initial = run(root, 'check-links.cjs');
+  const initial = run(root, 'check-markdown-commonmark-links.cjs');
   assert.equal(initial.status, 0, initial.stderr);
   fs.appendFileSync(path.join(root, 'README.md'), '\n[bad](absent.md)\n[escape](../outside.md)\n');
-  const result = run(root, 'check-links.cjs');
+  const result = run(root, 'check-markdown-commonmark-links.cjs');
   assert.equal(result.status, 1);
   assert.match(result.stderr, /target missing/);
   assert.match(result.stderr, /escapes root/);

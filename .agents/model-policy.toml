@@ -1,32 +1,11 @@
-# Codex reference configuration. Confirm product, availability, preferences,
-# reviewer, and fallback choices with the user before adopting these settings.
-# Change role assignments here; skills and procedures refer to role names.
-[adoption]
-status = "reference" # Set to "approved" only after user confirmation.
-product = "Codex" # Record the actual target product.
+# Optional model preferences. Skills work with host defaults without this file.
+# These model names are examples; choose models available through your provider.
+# This file records preferences, not executable host configuration.
 
-[execution]
-mode = "adaptive" # "fixed" restricts every execution helper to fixed_role.
-allowed_roles = ["routine", "standard", "difficult"]
-fixed_role = "standard" # Used only in fixed mode; must be an allowed role.
-fork_turns = "none" # Adapt to the target delegation API.
-unavailable = "ask" # Or "allowed-role-or-main", if the user approves it.
-
-[execution.routine]
-model = "gpt-6-luna"
-reasoning_effort = "medium"
-
-[execution.standard]
+[implementation]
 model = "gpt-6.1-sol"
-reasoning_effort = "medium"
-allowed_reasoning_efforts = ["medium", "high"]
 
-[execution.difficult]
+[review]
 model = "gpt-6-astra"
-reasoning_effort = "medium"
-allowed_reasoning_efforts = ["medium", "high"]
-
-[reviewer]
-model = "gpt-6-astra"
-reasoning_effort = "medium"
-fork_turns = "none"
+# Use a fresh independent reviewer, then the same reviewer through explicit approval.
+# The implementation and review models may be the same.

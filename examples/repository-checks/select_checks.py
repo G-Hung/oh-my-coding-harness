@@ -69,7 +69,10 @@ def plan(paths: list[str], config: dict) -> list[dict]:
         selected.append(
             {"name": name, "paths": matched, "command": command, "selected": bool(matched)}
         )
-    ignored = config.get("selection", {}).get("ignore", [])
+    selection = config.get("selection", {})
+    if not isinstance(selection, dict):
+        raise ValueError("selection must be a table")
+    ignored = selection.get("ignore", [])
     if not isinstance(ignored, list) or any(
         not isinstance(item, str) or not item for item in ignored
     ):

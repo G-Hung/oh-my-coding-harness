@@ -6,15 +6,51 @@ integration, build, or browser checks when changed boundaries require them.
 For documentation-only edits, local-link checks and semantic README review may
 be sufficient. Say what was not exercised.
 
-Before concluding there is no changed scope, inventory changes against the
-selected base, staged and unstaged changes, and relevant untracked files. An empty
-`git diff` alone is insufficient. When that complete inventory is empty, infer no
-change-specific reading or checks; explicitly requested audits and adopted ship
-gates still apply. Ordinary prose edits need relevant documentation guidance;
-instruction changes also need realistic
-routing and ownership scenarios. Source, configuration, schema, stylesheet, and
-mixed changes retain affected-domain checks and consumer discovery, regardless
-of file extension. A helper's suggestions do not replace the adopted ship gate.
+Once the relevant checks and adopted gates pass, proceed to handoff. Repeat or
+expand validation when behavior changes, new evidence appears, or a specific
+unresolved risk remains. A simpler design may remove the need for another check.
+
+Start with three actions:
+
+1. Inventory the change against the comparison base, including staged, unstaged,
+   and relevant untracked files.
+2. Choose checks for the affected behavior and consumers. Prose needs link and
+   accuracy review; agent instructions also need realistic usage scenarios.
+3. Run the project's adopted gates and report what they actually exercised.
+   With no changes, only explicitly requested audits and adopted gates apply.
+
+## Select the evidence
+
+Choose the smallest useful check for the failure mechanism, then satisfy all
+adopted gates. A simpler design or stronger representation may prevent a problem
+better than another check. This table does not require new tools or installations.
+
+| Technique | Use for |
+| --- | --- |
+| Lint / static rules | Detectable mistakes, forbidden imports, structural conventions |
+| Types / schemas | Invalid representations, interface mismatches, external input shape |
+| Unit tests | Local rules and boundary cases |
+| Integration / contract tests | Storage, serialization, adapters, component agreements |
+| End-to-end tests | Critical workflows through assembled components |
+| Build / package checks | Compilation, generated artifacts, distribution assembly |
+| Property / differential tests | Broad invariants or comparison with an independent baseline |
+| Fault / concurrency tests | Interrupted work, retries, partial writes, races |
+| Profiling / benchmarks | Measured resource or performance problems under comparable workloads |
+| Model checking / formal methods | Consequential state transitions and ordering invariants |
+
+Match claims to the boundary exercised: static types need runtime validation at
+external inputs; integration tests need representative dependencies; formal
+results apply to the modeled assumptions and bounds. Inspect skips and empty
+discovery before reporting a pass.
+
+For a prose edit, check links and meaning, then finish the adopted gate. For a
+checker behavior change, test its success and representative failure paths.
+Investigate an unchanged checker when there is evidence of a defect or coverage
+gap; do not add a second validation layer merely to reassure yourself.
+
+For test-design examples, use the optional [testing guide](testing.md). For
+modeled protocols, use [formal verification](formal-verification.md) if adopted.
+This guide retains the execution and evidence rules needed on its own.
 
 ## Adopted commands
 
@@ -29,7 +65,7 @@ commands and prerequisites when adopting it; do not run missing sample commands.
 | --- | --- | --- |
 | Full local gate | `npm run check` | `uv run python tools/check.py` |
 | README change prompt | `npm run check:readme` | `uv run python tools/check_readme_coverage.py --staged` |
-| Local Markdown links | `npm run check:links` | `uv run python tools/check_markdown_links.py` |
+| Local Markdown links | `npm run check:links` | `uv run python tools/check_markdown_commonmark_links.py` |
 | File-size review | `npm run check:loc` | `uv run python tools/check_max_lines.py` |
 | Slow-test evidence | `npm run test:profile`, then `npm run test:slow` | `uv run pytest --durations=15` |
 | Readiness | `npm run doctor` | `uv sync --locked` installs the pinned environment; the gate checks tool availability |
@@ -38,10 +74,7 @@ The Python kit documents `--frozen --offline` validation after initial setup.
 Dependency installation is setup, not a read-only audit step.
 
 Treat file-size and README heuristics as review prompts unless the adopted policy
-explicitly makes them blocking. A passing prompt does not prove documentation
-accuracy or architectural quality. A full test pass only supports the scenarios
-that actually ran; inspect skips and empty discovery. Do not use a green formatter
-or typecheck result as evidence that runtime behavior works.
+makes them blocking. Review the affected design and documentation directly.
 
 <!-- TODO: Add the project's build, integration, and browser commands here, with
 prerequisites and the conditions that make each required. -->
@@ -60,20 +93,20 @@ Do not bypass hooks or assume they ran because a Git command succeeded.
 
 ## Test quality and speed
 
-Prefer distinct behavioral regressions: state, permission, persistence, recovery,
-concurrency, and failure handling. Avoid tests that simply mirror an implementation
-or assert styling details unrelated to the requested behavior. A new test file is
-not itself evidence of better coverage.
+Check observable behavior, not a copy of the implementation. Select distinct
+regressions for affected contracts and failure paths. If a selection finds no
+tests for changed executable code, select meaningful coverage or report the gap.
+Profile slow tests before optimizing; preserve assertions and compare equivalent
+environments. Detailed test design and examples belong in the optional testing
+guide; these minimum rules also apply when it has not been copied.
 
-Use the top-slow-test report to choose optimization targets. Distinguish expensive
-fixture setup from test-body cost; compare like-for-like runtime and cache states.
-Replace unnecessary long delays, repeated scans, and redundant integration mounts
-while preserving meaningful contracts. Do not remove assertions merely for speed.
-Scan source once when several assertions use the same repository snapshot.
-
-If a focused selection finds no tests for changed executable code, choose relevant
-behavioral coverage explicitly or report the gap. When coverage is measured, keep
-the same source denominator before and after a change, including unimported files.
+For parallel branches or worktrees, the optional [Git overlap check](../../examples/git-checks/README.md)
+and [port helper](../../examples/ports/README.md) can reveal integration or listener
+conflicts. Use existing project tools when they already solve the problem.
+When a remote check reports a merge conflict, inspect both changes' intent,
+repair the task branch, run affected checks, and recheck remote compatibility.
+Same-file overlap alone needs no repair. Merging an unfinished peer PR is not
+the default fix; ask when resolution requires a decision beyond the task's scope.
 
 ## Server lifecycle
 
@@ -113,10 +146,7 @@ Fix in-scope failures and rerun affected checks; broaden or repeat passing check
 only for new changes, demonstrated risk, or an explicit requirement. Preserve
 original failures when diagnostic reruns add evidence.
 
-For expensive derived-data or artifact computation, identify the changed inputs,
-rules, runtime, scope, and downstream consumers before executing. Reuse evidence
-only under the project's compatibility/provenance contract and distinguish new
-execution, reused evidence, and unverified scope. Retain completed evidence across
-interruptions. Missing evidence is a gap to resolve, not permission to launch a
-production rebuild. This does not waive required code checks or the final gate;
-local test fixtures and production recomputation have different effects.
+Before expensive computation, identify what changed and which result needs to be
+refreshed. Reuse existing results when their inputs and assumptions still apply,
+and distinguish reused results from new runs. Operations on shared environments
+must stay within task authorization.
