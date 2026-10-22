@@ -62,7 +62,9 @@ $code-sweep
 ```
 
 Review its findings and choose work to send through the next ship cycle. The
-skills do not authorize commits, pushes, publication, or schedules by themselves.
+ship-cycle commits reviewed task changes before handoff unless you explicitly
+request an uncommitted result. Code-sweep remains read-only. Pushes, publication,
+and schedules require task authorization.
 See [Codex adoption notes](adapters/codex/README.md) for layout and invocation.
 
 ## Maintain this library
