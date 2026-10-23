@@ -12,6 +12,12 @@ Edit the TODOs in [configuration](harness.config.cjs): source roots, Markdown ro
 
 ## Commands
 
+Keep TypeScript within the peer ranges of both `ts-jest` and `typescript-eslint`.
+The current kit uses TypeScript 5.9. TypeScript 7 is not compatible with these
+tools: `ts-jest` 29.4.15 requires `<7`, and `typescript-eslint` 8.72.0 requires
+`>=4.8.4 <6.1.0`. Do not use `--force` or `--legacy-peer-deps` to bypass this
+conflict. Recheck both peer ranges before upgrading the compiler.
+
 | Command | Behavior |
 | --- | --- |
 | `npm run check` | Sequential lint, types, full Jest tests, script tests, line check and local Markdown links; continue gathering failures and retain failure logs |

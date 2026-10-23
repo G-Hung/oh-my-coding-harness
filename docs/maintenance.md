@@ -186,6 +186,12 @@ Review manifest and lockfile changes together. Require passing CI before merging
 no workflow enables automatic merging. The formal TypeScript example has no
 package dependencies and needs no separate npm update entry.
 
+TypeScript 7.x version updates are temporarily excluded because the kit's Jest
+transformer and ESLint parser do not support that compiler version. Keep other
+updates enabled. Remove the exclusion when both tools declare compatible peer
+ranges, then verify a normal `npm ci` and the full gate. See the
+[TypeScript kit](../kits/typescript/README.md#commands) for the current constraints.
+
 Actions use full commit hashes with version comments for Dependabot. CI uses
 read-only repository access. Only the CodeQL reporting job requests
 `security-events: write`. Pull request workflows use `pull_request` and do not
